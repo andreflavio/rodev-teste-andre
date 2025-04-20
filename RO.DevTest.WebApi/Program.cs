@@ -2,7 +2,7 @@ using RO.DevTest.Application;
 using RO.DevTest.Infrastructure.IoC;
 using RO.DevTest.Persistence;
 using RO.DevTest.Persistence.IoC;
-
+using Microsoft.EntityFrameworkCore; // Adicionado para DbContext.Database.EnsureCreated/Migrate
 
 namespace RO.DevTest.WebApi;
 
@@ -15,55 +15,129 @@ public class Program
         // Adicione a configuração ao contêiner de serviços se precisar acessá-la em outros lugares
         // builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
+        // Configuração dos Serviços
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // --- ALTERAÇÃO AQUI ---
-        // Chame o método InjectPersistenceDependencies e PASSE a configuração (builder.Configuration)
+        // Configuração do CORS - INÍCIO
+        builder.Services.AddCors(options =>
+        {
+            // Política de CORS mais específica (pode ser útil para outros ambientes ou cenários)
+            options.AddPolicy("AllowSwaggerUI",
+                builder =>
+                {
+                    // Permite requisições vindas especificamente da origem onde o Swagger UI está rodando via HTTP
+                    // Ajuste a porta (5087) se necessário.
+                    builder.WithOrigins("http://localhost:5087")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+
+            // ** POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO **
+            // Esta política permite qualquer origem, método e cabeçalho.
+            // Use SOMENTE em ambientes de desenvolvimento/teste local.
+            options.AddPolicy("DevelopmentPolicy",
+                builder =>
+                {
+                    builder.AllowAnyOrigin() // Permite requisições de QUALQUER origem
+                           .AllowAnyHeader() // Permite qualquer cabeçalho na requisição
+                           .AllowAnyMethod(); // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
+                });
+        });
+        // Configuração do CORS - FIM
+
+
+        // Configuração de Injeção de Dependência das Camadas
         builder.Services.InjectPersistenceDependencies(builder.Configuration)
             .InjectInfrastructureDependencies();
-        // --- FIM DA ALTERAÇÃO ---
 
-
-        // Add Mediatr to program
+        // Configuração do MediatR
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(
-                typeof(ApplicationLayer).Assembly,
-                typeof(Program).Assembly
+                typeof(ApplicationLayer).Assembly, // Assembly da camada de Application
+                typeof(Program).Assembly // Assembly da camada WebApi
             );
         });
+
+        // Fim da Configuração dos Serviços
 
         var app = builder.Build();
 
         // --- Opcional: Aplicar Migrations automaticamente na inicialização (bom para desenvolvimento/testes) ---
-        // Esta parte não é estritamente necessária para RODAR a app, mas garante que o DB esteja atualizado
-        // Pode ser removido em ambientes de produção mais controlados.
+        // Esta parte NÃO é estritamente necessária para RODAR a app, mas garante que o DB esteja atualizado.
+        // Pode ser removido ou adaptado em ambientes de produção mais controlados.
         using (var scope = app.Services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<DefaultContext>();
-            // Se estiver usando um banco de dados de verdade, certifique-se de que o banco existe
-            // dbContext.Database.Migrate(); // Aplica as migrations pendentes
-            // Ou para recriar o banco a cada run (apenas DEV/TESTES MUITO INICIAIS)
-            dbContext.Database.EnsureCreated(); // Cuidado! Isso não usa migrations e pode ser problemático
+            var services = scope.ServiceProvider;
+            try
+            {
+                var dbContext = services.GetRequiredService<DefaultContext>();
+                // Aplica as migrations pendentes (recomendado para DBs reais em DEV)
+                // dbContext.Database.Migrate();
+                // OU para recriar o banco a cada run (apenas DEV/TESTES MUITO INICIAIS e com CAUTELA!)
+                // dbContext.Database.EnsureCreated(); // Isso NÃO usa migrations
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "Um erro ocorreu ao aplicar as migrações do banco de dados.");
+                // Considere não iniciar a aplicação se a migração falhar em ambientes críticos
+            }
         }
         // --- Fim da seção opcional de Migrations ---
 
 
-        // Configure the HTTP request pipeline.
+        // Configuração do Pipeline de Requisição HTTP
+        // Esta seção define a ordem em que os middlewares processam as requisições.
+
+        // ** Configurações ESPECÍFICAS para o Ambiente de Desenvolvimento **
         if (app.Environment.IsDevelopment())
         {
+            // Habilita o Swagger e Swagger UI apenas em desenvolvimento
             app.UseSwagger();
             app.UseSwaggerUI();
+
+            // ** HABILITA A POLÍTICA DE CORS PERMISSIVA APENAS EM DESENVOLVIMENTO **
+            // Coloque UseCors AQUI para que ele seja aplicado no pipeline de DEV.
+            app.UseCors("DevelopmentPolicy"); // <-- Usa a política que permite AllowAnyOrigin()
+
+            // ** DESABILITA o Redirecionamento HTTPS APENAS EM DESENVOLVIMENTO **
+            // Comentamos ou removemos UseHttpsRedirection NESTE BLOCO.
+            // Isso permite que o Swagger UI (HTTP) se comunique diretamente com a API (ainda que rodando em HTTP/HTTPS)
+            // sem o redirecionamento forçado que pode causar conflitos de CORS.
+            // app.UseHttpsRedirection(); // <-- Esta linha NÃO deve estar ativa aqui em DEV
+
+        }
+        // ** Configurações para OUTROS Ambientes (Produção, Staging, etc.) **
+        else
+        {
+            // Em outros ambientes, o Redirecionamento HTTPS GERALMENTE deve estar ATIVO por segurança.
+            app.UseHttpsRedirection();
+
+            // Em outros ambientes, use uma política de CORS MAIS RESTRITIVA e segura, se necessário.
+            // Por exemplo, permitir requisições APENAS do seu frontend de produção.
+            // app.UseCors("AllowSwaggerUI"); // Exemplo: usar a política mais específica
+            // app.UseCors("SuaPoliticaDeProducao");
         }
 
-        app.UseHttpsRedirection();
+        // Middlewares COMUNS a TODOS os ambientes (Geralmente)
+        // UseRouting deve vir ANTES de UseCors, UseAuthentication, UseAuthorization
+        // app.UseRouting(); // Se você não tem UseRouting explícito, MapControllers geralmente o implica
 
-        app.UseAuthorization();
+        // O middleware de CORS pode vir aqui também se a mesma política se aplicar a todos os ambientes,
+        // mas como temos políticas diferentes para DEV e outros, colocamos dentro dos blocos if/else.
+        // Se você moveu UseCors para fora do if/else, remova-o de dentro.
+        // app.UseCors("NomeDaPoliticaParaTodosOsAmbientes");
 
+        app.UseAuthorization(); // UseAuthentication (se aplicável) viria antes de UseAuthorization
+
+        // MapControllers mapeia os endpoints dos seus controladores.
+        // Deve vir DEPOIS dos middlewares que afetam a seleção/autorização de endpoint (Routing, CORS, Auth).
         app.MapControllers();
 
+        // Inicia a aplicação
         app.Run();
     }
 }
