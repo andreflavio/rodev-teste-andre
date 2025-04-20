@@ -14,9 +14,13 @@
           [Arquivo] CreateUserCommandHandler.cs
           [Arquivo] CreateUserCommandValidator.cs
           [Arquivo] CreateUserResult.cs
-            [Arquivo] GetAllUsersCommand.cs
-            [Arquivo] GetAllUsersCommandHandler.cs
-            [Arquivo] GetAllUsersResult.cs
+          [Arquivo] GetAllUsersCommand.cs
+          [Arquivo] GetAllUsersCommandHandler.cs
+          [Arquivo] GetAllUsersResult.cs
+          [Arquivo] UpdateUserCommand.cs
+          [Arquivo] UpdateUserCommandHandler.cs
+          [Arquivo] UpdateUserCommandValidator.cs
+          [Arquivo] UpdateUserResult.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Application.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Application.GlobalUsings.g.cs

@@ -9,7 +9,8 @@ namespace RO.DevTest.Application.Contracts.Infrastructure;
 /// This is a abstraction of the Identity library, creating methods that will interact with 
 /// it to create and update users
 /// </summary>
-public interface IIdentityAbstractor {
+public interface IIdentityAbstractor
+{
     /// <summary>
     /// Finds a <see cref="User"/> through its
     /// ID asynchronously
@@ -98,4 +99,7 @@ public interface IIdentityAbstractor {
     /// A <see cref="Task{IdentityResult}"/>
     /// </returns>
     Task<IdentityResult> DeleteUser(User user);
+    Task<User> FindByIdAsync(Guid id);
+    Task<IdentityResult> UpdateUserAsync(User userToUpdate);
+    Task RemoveFromRoleAsync(User userToUpdate, object originalRole);
 }

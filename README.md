@@ -50,22 +50,52 @@ Aqui estão alguns comandos básicos do .NET CLI (Command Line Interface) úteis
 
 ---
 
-### Ferramenta para Documentação da Estrutura
+### Endpoints da API - Usuários
 
+A API de Usuários está disponível na rota base `/api/user`.
+
+#### Atualizar Usuário (PUT)
+
+Permite atualizar os dados de um usuário existente.
+
+- **Método:** `PUT`
+- **Rota:** `/api/user/{id}`
+  - `{id}`: O ID (GUID) do usuário a ser atualizado.
+- **Corpo da Requisição (JSON):** Deve conter os dados do usuário a serem atualizados. O ID no corpo deve **corresponder** ao ID na rota.
+
+Exemplo de corpo da requisição:
+
+```json
+{
+  "id": "16cb3d6d-5bab-4d6e-991a-9f84af55e47e",
+  "name": "mel",
+  "userName": "melzinho",
+  "email": "melzinho@gmail.com",
+  "role": 1
+}
+Descrição dos Campos:
+
+id (string, formato GUID): O ID do usuário.
+name (string): O nome completo do usuário.
+userName (string): O nome de login do usuário.
+email (string): O endereço de e-mail do usuário.
+role (integer): O papel/perfil do usuário (corresponde aos valores do enum UserRoles).
+Respostas Típicas:
+
+200 OK: A atualização foi bem-sucedida. Retorna um UpdateUserResult com sucesso e mensagem.
+400 Bad Request: A requisição é inválida (erros de validação, ID da rota não coincide com o corpo, usuário não encontrado, ou erros do sistema de identidade).
+500 Internal Server Error: Ocorreu um erro inesperado no servidor.
+Você pode testar este endpoint usando a interface do Swagger UI (/swagger) ou ferramentas como Postman ou curl.
+
+Ferramenta para Documentação da Estrutura
 Para gerar a representação em texto da estrutura de pastas e arquivos do projeto (como mostrado em algumas descrições), foi utilizado um script simples em PowerShell.
 
-- **`.\gerar_esqueleto.ps1`**: Este script escaneia as pastas do projeto e gera uma árvore de arquivos e diretórios em formato texto.
+.\gerar_esqueleto.ps1: Este script escaneia as pastas do projeto e gera uma árvore de arquivos e diretórios em formato texto.
+Otimização e Refatoração
+Sinta-se à vontade para otimizar ou refatorar partes do código que você acredite que possam ser aprimoradas. No entanto, as refatorações devem seguir os padrões já estabelecidos no projeto. Além disso, cada refatoração significativa deve ser separada em um commit próprio, com uma mensagem clara que a identifique (seguindo, por exemplo, o padrão de commits semânticos como refactor:).
 
----
-
-### Otimização e Refatoração
-
-Sinta-se à vontade para otimizar ou refatorar partes do código que você acredite que possam ser aprimoradas. No entanto, as refatorações devem **seguir os padrões** já estabelecidos no projeto. Além disso, cada refatoração significativa deve ser separada em um **commit próprio**, com uma mensagem clara que a identifique (seguindo, por exemplo, o padrão de commits semânticos como `refactor:`).
-
-### Criação de um Frontend (Diferencial Opcional)
-
-Como um diferencial opcional, você pode criar uma interface de frontend que se comunique com a Web API desenvolvida. Se optar por criar o frontend, ele deverá se comunicar com a API via requisições HTTP, e o código desse frontend **deve residir no mesmo repositório** da Web API (preferencialmente em uma pasta separada na raiz, ex: `/frontend`).
-
----
+Criação de um Frontend (Diferencial Opcional)
+Como um diferencial opcional, você pode criar uma interface de frontend que se comunique com a Web API desenvolvida. Se optar por criar o frontend, ele deverá se comunicar com a API via requisições HTTP, e o código desse frontend deve residir no mesmo repositório da Web API (preferencialmente em uma pasta separada na raiz, ex: /frontend).
 
 Lembre-se de que a submissão do teste envolve enviar o link deste repositório público no GitHub, com o histórico de commits organizados seguindo o GitFlow básico e commits semânticos.
+```
