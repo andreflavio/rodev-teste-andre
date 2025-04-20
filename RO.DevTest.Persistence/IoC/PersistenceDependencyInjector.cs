@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration; // Adicionar este using para IConfiguration
+using System; // Adicionar este using para Console
+using RO.DevTest.Application.Contracts.Persistance.Repositories; // Adicionar using para IUserRepository
+using RO.DevTest.Persistence.Repositories; // Adicionar using para UserRepository
+using RO.DevTest.Persistence; // Adicionar using para DefaultContext (se DefaultContext estiver neste namespace)
 
-namespace RO.DevTest.Persistence.IoC;
+namespace RO.DevTest.Persistence.IoC; // Note: O namespace é RO.DevTest.Persistence.IoC
 
 public static class PersistenceDependencyInjector
 {
@@ -21,7 +25,7 @@ public static class PersistenceDependencyInjector
     /// </returns>
     public static IServiceCollection InjectPersistenceDependencies(this IServiceCollection services, IConfiguration configuration)
     {
-        // --- ALTERAÇÃO AQUI ---
+        // --- CONFIGURAÇÃO DO DBContext ---
         // Obtenha a string de conexão da configuração (appsettings.json)
         var connectionString = configuration.GetConnectionString("DefaultConnection"); // Nome da sua string de conexão no appsettings.json
 
@@ -37,26 +41,34 @@ public static class PersistenceDependencyInjector
             Console.WriteLine("------------------------------------------------------------------------------------\n");
             Console.ResetColor();
 
-            // Dependendo de como você quer lidar com isso em caso de erro fatal,
-            // você pode querer parar a aplicação:
-            // throw new InvalidOperationException("A string de conexão 'DefaultConnection' para o PostgreSQL não está configurada.");
+            // Em um cenário real, você PROVAVELMENTE quer lançar uma exceção aqui
+            // throw new InvalidOperationException("A string de conexão 'DefaultConnection' não está configurada.");
 
-            // Ou, em um cenário de fallback *apenas* para testes locais (não recomendado para ir para outros ambientes),
-            // você poderia manter o in-memory SE a string faltar, mas isso é confuso.
-            // O ideal é FALHAR se a string do BD principal estiver faltando.
-
-            // Para este exemplo, vamos apenas logar o erro e *não* configurar um DbContext funcional.
-            // Isso provavelmente causará erros posteriormente quando a aplicação tentar usar o DbContext.
-            // A abordagem de lançar exceção é mais segura para desenvolvimento.
+            // Para este exemplo, continuamos, mas o DbContext NÃO será configurado,
+            // levando a erros subsequentes quando a aplicação tentar usá-lo.
         }
         else
         {
-            // Configure o DbContext para usar PostgreSQL
+            // Configure o DbContext para usar PostgreSQL com a string de conexão encontrada
             services.AddDbContext<DefaultContext>(options =>
-                options.UseNpgsql(connectionString, // Use UseNpgsql com a string de conexão
-                b => b.MigrationsAssembly(typeof(DefaultContext).Assembly.FullName))); // Adicione isso se usar Migrations no mesmo assembly do DbContext
+                 options.UseNpgsql(connectionString,
+                 b => b.MigrationsAssembly(typeof(DefaultContext).Assembly.FullName))); // Adicione isso se usar Migrations no mesmo assembly do DbContext
         }
-        // --- FIM DA ALTERAÇÃO ---
+        // --- FIM DA CONFIGURAÇÃO DO DBContext ---
+
+        // --- REGISTRO DOS REPOSITÓRIOS ---
+        // ** ESTA É A LINHA ESSENCIAL PARA RESOLVER O SEU ERRO DE DI **
+        // Registra a interface IUserRepository para ser resolvida pela classe concreta UserRepository
+        services.AddScoped<IUserRepository, UserRepository>(); // <-- Corrigido: UserRepository no segundo tipo
+
+        // Se você tiver outros repositórios específicos (além da BaseRepository),
+        // registre-os aqui também. Ex:
+        // services.AddScoped<IOtherRepository, OtherRepository>();
+
+        // Note: BaseRepository<TEntity> geralmente não precisa ser registrada diretamente
+        // a menos que seja usada diretamente (o que não é comum). Os repositórios específicos
+        // que herdam dela (como UserRepository) são os que precisam ser registrados.
+        // --- FIM DO REGISTRO DOS REPOSITÓRIOS ---
 
 
         return services;
