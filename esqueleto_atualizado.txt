@@ -14,6 +14,8 @@
           [Arquivo] CreateUserCommandHandler.cs
           [Arquivo] CreateUserCommandValidator.cs
           [Arquivo] CreateUserResult.cs
+          [Arquivo] DeleteUserCommand.cs
+          [Arquivo] DeleteUserCommandHandler.cs
           [Arquivo] GetAllUsersCommand.cs
           [Arquivo] GetAllUsersCommandHandler.cs
           [Arquivo] GetAllUsersResult.cs

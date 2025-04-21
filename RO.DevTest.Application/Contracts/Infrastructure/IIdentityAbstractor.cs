@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Domain.Enums;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RO.DevTest.Application.Contracts.Infrastructure;
 
-
 /// <summary>
-/// This is a abstraction of the Identity library, creating methods that will interact with 
+/// This is a abstraction of the Identity library, creating methods that will interact with
 /// it to create and update users
 /// </summary>
 public interface IIdentityAbstractor
@@ -22,7 +23,7 @@ public interface IIdentityAbstractor
     /// The <see cref="User"/> if found, <see cref="null"/>
     /// otherwise
     /// </returns>
-    Task<User?> FindUserByIdAsync(string userId);
+    Task<User?> FindByIdAsync(Guid userId); // Mantive esta versão
 
     /// <summary>
     /// Finds a <see cref="User"/> through its
@@ -98,8 +99,8 @@ public interface IIdentityAbstractor
     /// <returns>
     /// A <see cref="Task{IdentityResult}"/>
     /// </returns>
-    Task<IdentityResult> DeleteUser(User user);
-    Task<User> FindByIdAsync(Guid id);
+    Task<IdentityResult> DeleteUser(User user); // Você pode remover esta se preferir a próxima com nome mais claro
     Task<IdentityResult> UpdateUserAsync(User userToUpdate);
     Task RemoveFromRoleAsync(User userToUpdate, object originalRole);
+    Task<IdentityResult> DeleteUserAsync(User userToDelete);
 }

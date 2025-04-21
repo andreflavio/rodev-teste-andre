@@ -54,7 +54,7 @@ public class IdentityAbstractor : IIdentityAbstractor
     public async Task<SignInResult> PasswordSignInAsync(User user, string password)
         => await _signInManager.PasswordSignInAsync(user, password, false, false);
 
-    public async Task<IdentityResult> DeleteUser(User user) => await _userManager.DeleteAsync(user);
+    public async Task<IdentityResult> DeleteUserAsync(User userToDelete) => await _userManager.DeleteAsync(userToDelete);
 
     public async Task<IdentityResult> AddToRoleAsync(User user, UserRoles role)
     {
@@ -149,6 +149,11 @@ public class IdentityAbstractor : IIdentityAbstractor
             // Isso pode acontecer se originalRole for um tipo inesperado.
             Console.WriteLine($"Aviso: Não foi possível determinar o nome do papel a partir do objeto fornecido para o usuário {userToUpdate.Id}. Tipo fornecido: {(originalRole != null ? originalRole.GetType().Name : "null")}");
         }
+    }
+
+    public Task<IdentityResult> DeleteUser(User user)
+    {
+        throw new NotImplementedException();
     }
 
     // <<< FIM DOS MÉTODOS QUE PRECISAVAM SER IMPLEMENTADOS >>>
