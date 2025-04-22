@@ -19,17 +19,15 @@ namespace RO.DevTest.WebApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
-            var result = await _mediator.Send(command);
+            var response = await _mediator.Send(command);
 
-            if (result.Success)
+            if (response.Success)
             {
-                return Ok(new { Token = result.AccessToken }); // Use AccessToken
+                return Ok(response); // Retorna todo o objeto de resposta (incluindo o token)
             }
             else
             {
-                // Você precisará adicionar uma propriedade ErrorMessage ao seu LoginResponse
-                // para que isso funcione. Por enquanto, podemos retornar uma mensagem genérica.
-                return Unauthorized("Falha na autenticação");
+                return Unauthorized(response.ErrorMessage); // Retorna Unauthorized com a mensagem de erro
             }
         }
     }
