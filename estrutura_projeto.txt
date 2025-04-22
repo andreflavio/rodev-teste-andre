@@ -1,0 +1,81 @@
+Estrutura de Pastas do Projeto: C:\Users\André\teste\rodev_testnew
+----------------------------------------
+[RO.DevTest.Application]
+  [Contracts]
+    [Infrastructure]
+      [Arquivo] IIdentityAbstractor.cs
+    [Persistance]
+      [Repositories]
+        [Arquivo] IBaseRepository.cs
+        [Arquivo] IUserRepository.cs
+  [Features]
+    [Auth]
+      [Commands]
+        [LoginCommand]
+    [User]
+      [Commands]
+        [CreateUserCommand]
+        [DeleteUserCommand]
+        [GetAllUsersCommand]
+        [UpdateUserCommand]
+  [Arquivo] ApplicationLayer.cs
+  [Arquivo] RO.DevTest.Application.csproj
+[RO.DevTest.Domain]
+  [Abstract]
+    [Arquivo] BaseEntity.cs
+  [Entities]
+    [Arquivo] User.cs
+  [Enums]
+    [Arquivo] UserRoles.cs
+  [Exception]
+    [Arquivo] ApiException.cs
+    [Arquivo] BadRequestException.cs
+  [Arquivo] RO.DevTest.Domain.csproj
+[RO.DevTest.Infrastructure]
+  [Abstractions]
+    [Arquivo] IdentityAbstractor.cs
+  [IoC]
+    [Arquivo] InfrastructureDependecyInjector.cs
+  [Arquivo] RO.DevTest.Infrastructure.csproj
+[RO.DevTest.Persistence]
+  [IoC]
+    [Arquivo] PersistenceDependencyInjector.cs
+  [Migrations]
+    [Arquivo] 20250419225321_InitialCreate.Designer.cs
+    [Arquivo] 20250419225321_InitialCreate.cs
+    [Arquivo] 20250419233513_RecreateDatabase.Designer.cs
+    [Arquivo] 20250419233513_RecreateDatabase.cs
+    [Arquivo] DefaultContextModelSnapshot.cs
+  [Repositories]
+    [Arquivo] BaseRepository.cs
+    [Arquivo] DefaultContextFactory.cs
+    [Arquivo] UserRepository.cs
+  [Arquivo] DefaultContext.cs
+  [Arquivo] RO.DevTest.Persistence.csproj
+  [Arquivo] appsettings.json
+[RO.DevTest.Tests]
+  [Unit]
+    [Application]
+      [Features]
+        [User]
+          [Commands]
+  [Arquivo] RO.DevTest.Tests.csproj
+[RO.DevTest.WebApi]
+  [Controllers]
+    [Arquivo] AuthController.cs
+    [Arquivo] UsersController.cs
+  [Properties]
+    [Arquivo] launchSettings.json
+  [Arquivo] Program.cs
+  [Arquivo] RO.DevTest.WebApi.csproj
+  [Arquivo] appsettings.Development.json
+  [Arquivo] appsettings.json
+[Arquivo] .gitignore
+[Arquivo] README_RotaDasOficinas.md
+[Arquivo] RO.DevTest.sln
+[Arquivo] esqueleto_atualizado.txt
+[Arquivo] estrutura_projeto.txt
+[Arquivo] gerar_esqueleto.ps1
+[Arquivo] key.py
+[Arquivo] listar_pastas.py
+[Arquivo] sair

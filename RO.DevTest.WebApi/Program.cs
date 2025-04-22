@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+
 namespace RO.DevTest.WebApi;
 
 public class Program
@@ -62,9 +63,9 @@ public class Program
                 typeof(ApplicationLayer).Assembly, // Assembly da camada de Application
                 typeof(Program).Assembly // Assembly da camada WebApi
             );
-        });
 
-        // 1. Adicionar o serviço de autenticação
+        });
+        // ** ADICIONE ESTAS LINHAS AQUI (Configuração da Autenticação JWT) **
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -80,33 +81,16 @@ public class Program
                 };
             });
 
-        // Fim da Configuração dos Serviços
+        builder.Services.AddAuthorization(); // Adicionar autorização
+        // ** FIM DA ADIÇÃO **
 
         var app = builder.Build();
 
-        // --- Opcional: Aplicar Migrations automaticamente na inicialização (bom para desenvolvimento/testes) ---
-        // Esta parte NÃO é estritamente necessária para RODAR a app, mas garante que o DB esteja atualizado.
-        // Pode ser removido ou adaptado em ambientes de produção mais controlados.
+        // --- Opcional: Aplicar Migrations automaticamente na inicialização ---
         using (var scope = app.Services.CreateScope())
         {
-            var services = scope.ServiceProvider;
-            try
-            {
-                var dbContext = services.GetRequiredService<DefaultContext>();
-                // Aplica as migrations pendentes (recomendado para DBs reais em DEV)
-                // dbContext.Database.Migrate();
-                // OU para recriar o banco a cada run (apenas DEV/TESTES MUITO INICIAIS e com CAUTELA!)
-                // dbContext.Database.EnsureCreated(); // Isso NÃO usa migrations
-            }
-            catch (Exception ex)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "Um erro ocorreu ao aplicar as migrações do banco de dados.");
-                // Considere não iniciar a aplicação se a migração falhar em ambientes críticos
-            }
+            // ... sua lógica de migration ...
         }
-        // --- Fim da seção opcional de Migrations ---
-
 
         // Configuração do Pipeline de Requisição HTTP
         // Esta seção define a ordem em que os middlewares processam as requisições.
