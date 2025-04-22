@@ -1,13 +1,36 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using NSwag.Annotations;
+using RO.DevTest.Application.Features.Auth.Commands.LoginCommand;
+using System.Threading.Tasks;
 
-namespace RO.DevTest.WebApi.Controllers;
+namespace RO.DevTest.WebApi.Controllers
+{
+    [ApiController]
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IMediator _mediator;
 
-[Route("api/auth")]
-[OpenApiTags("Auth")]
-public class AuthController(IMediator mediator) : Controller {
-    private readonly IMediator _mediator = mediator;
+        public AuthController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-    ///[TODO] - CREATE LOGIN HANDLER HERE 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.Success)
+            {
+                return Ok(new { Token = result.AccessToken }); // Use AccessToken
+            }
+            else
+            {
+                // Você precisará adicionar uma propriedade ErrorMessage ao seu LoginResponse
+                // para que isso funcione. Por enquanto, podemos retornar uma mensagem genérica.
+                return Unauthorized("Falha na autenticação");
+            }
+        }
+    }
 }

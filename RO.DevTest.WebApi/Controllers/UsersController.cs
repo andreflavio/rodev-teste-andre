@@ -44,7 +44,6 @@ namespace RO.DevTest.WebApi.Controllers
             CreateUserResult response = await _mediator.Send(request);
             return Created(HttpContext.Request.GetDisplayUrl(), response);
         }
-
         /// <summary>
         /// Busca todos os usuários ou filtra por nome e/ou username.
         /// </summary>

@@ -1,7 +1,7 @@
-﻿Esqueleto do Projeto: C:\Users\André\teste\RO.DevTest3
+﻿Esqueleto do Projeto: C:\Users\André\teste\RO.DevTest3-COPIA
 --------------------------------------------------
 [Arquivo] .gitignore
-[Arquivo] README.md
+[Arquivo] README_RotaDasOficinas.md
   [Arquivo] ApplicationLayer.cs
         [Arquivo] RO.DevTest.Application.deps.json
       [Arquivo] IIdentityAbstractor.cs
@@ -90,7 +90,6 @@
         [Arquivo] MvcTestingAppManifest.json
         [Arquivo] RO.DevTest.Tests.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Tests.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Tests.Program.cs
         [Arquivo] RO.DevTest.Tests.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Tests.csproj.nuget.dgspec.json

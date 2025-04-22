@@ -2,7 +2,8 @@
 
 namespace RO.DevTest.Application.Features.Auth.Commands.LoginCommand;
 
-public record LoginResponse {
+public record LoginResponse
+{
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? AccessToken { get; set; } = null;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -11,4 +12,7 @@ public record LoginResponse {
     public DateTime ExpirationDate { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IList<string>? Roles { get; set; } = null;
+    public bool Success { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ErrorMessage { get; set; } = null; // Esta é a linha adicionada
 }

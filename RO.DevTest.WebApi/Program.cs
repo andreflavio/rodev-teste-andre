@@ -3,6 +3,9 @@ using RO.DevTest.Infrastructure.IoC;
 using RO.DevTest.Persistence;
 using RO.DevTest.Persistence.IoC;
 using Microsoft.EntityFrameworkCore; // Adicionado para DbContext.Database.EnsureCreated/Migrate
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace RO.DevTest.WebApi;
 
@@ -30,8 +33,8 @@ public class Program
                     // Permite requisições vindas especificamente da origem onde o Swagger UI está rodando via HTTP
                     // Ajuste a porta (5087) se necessário.
                     builder.WithOrigins("http://localhost:5087")
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
 
             // ** POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO **
@@ -41,8 +44,8 @@ public class Program
                 builder =>
                 {
                     builder.AllowAnyOrigin() // Permite requisições de QUALQUER origem
-                           .AllowAnyHeader() // Permite qualquer cabeçalho na requisição
-                           .AllowAnyMethod(); // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
+                        .AllowAnyHeader() // Permite qualquer cabeçalho na requisição
+                        .AllowAnyMethod(); // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
                 });
         });
         // Configuração do CORS - FIM
@@ -60,6 +63,22 @@ public class Program
                 typeof(Program).Assembly // Assembly da camada WebApi
             );
         });
+
+        // 1. Adicionar o serviço de autenticação
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"], // Ler do appsettings.json
+                    ValidAudience = builder.Configuration["Jwt:Audience"], // Ler do appsettings.json
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // Ler do appsettings.json
+                };
+            });
 
         // Fim da Configuração dos Serviços
 
@@ -131,7 +150,8 @@ public class Program
         // Se você moveu UseCors para fora do if/else, remova-o de dentro.
         // app.UseCors("NomeDaPoliticaParaTodosOsAmbientes");
 
-        app.UseAuthorization(); // UseAuthentication (se aplicável) viria antes de UseAuthorization
+        app.UseAuthentication(); // Adicionado para usar a autenticação configurada
+        app.UseAuthorization(); // Adicionado para usar a autorização
 
         // MapControllers mapeia os endpoints dos seus controladores.
         // Deve vir DEPOIS dos middlewares que afetam a seleção/autorização de endpoint (Routing, CORS, Auth).
