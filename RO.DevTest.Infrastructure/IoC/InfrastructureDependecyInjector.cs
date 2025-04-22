@@ -4,10 +4,13 @@ using RO.DevTest.Application.Contracts.Infrastructure;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Infrastructure.Abstractions;
 using RO.DevTest.Persistence;
+using RO.DevTest.Application.Contracts.infraes; // Adicionado
+using RO.DevTest.Infrastructure; // Adicionado (assumindo JwtTokenGenerator aqui)
 
 namespace RO.DevTest.Infrastructure.IoC;
 
-public static class InfrastructureDependecyInjector {
+public static class InfrastructureDependecyInjector
+{
     /// <summary>
     /// Inject the dependencies of the Infrastructure layer into an
     /// <see cref="IServiceCollection"/>
@@ -18,13 +21,17 @@ public static class InfrastructureDependecyInjector {
     /// <returns>
     /// The <see cref="IServiceCollection"/> with dependencies injected
     /// </returns>
-    public static IServiceCollection InjectInfrastructureDependencies(this IServiceCollection services) {
+    public static IServiceCollection InjectInfrastructureDependencies(this IServiceCollection services)
+    {
         services.AddDefaultIdentity<User>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<DefaultContext>()
             .AddDefaultTokenProviders();
 
         services.AddScoped<IIdentityAbstractor, IdentityAbstractor>();
+
+        // Registro do JwtTokenGenerator
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }
