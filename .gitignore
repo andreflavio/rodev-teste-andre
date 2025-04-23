@@ -477,3 +477,11 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Arquivos a serem ignorados
+appsettings.json
+appsettings.Development.json
+RO.DevTest.Persistence/Repositories/DefaultContextFactory.cs
+esqueleto_atualizado.txt
+estrutura_projeto.txt
+gerar_esqueleto.ps1
