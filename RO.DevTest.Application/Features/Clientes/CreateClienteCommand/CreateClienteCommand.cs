@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace RO.DevTest.Application.Features.Clientes.CreateClienteCommand
 {
     public record CreateClienteCommand(
@@ -5,5 +7,5 @@ namespace RO.DevTest.Application.Features.Clientes.CreateClienteCommand
         string Email,
         string? Telefone,
         string? Endereco
-    );
+    ) : IRequest<CreateClienteResult>; // 👈 ADICIONE ISSO
 }

@@ -1,17 +1,11 @@
-using RO.DevTest.Domain.Entities;
-using RO.DevTest.Application.Contracts.Persistance.Repositories; // Namespace correto para IBaseRepository
-using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
-
-namespace RO.DevTest.Application.Contracts
+namespace RO.DevTest.Persistence.Repositories
 {
-    public interface IClienteRepository : IBaseRepository<Cliente>
+    public interface IClienteRepository
     {
-        Task<Cliente> AddAsync(Cliente cliente);
-        Task<Cliente?> GetByIdAsync(Guid id);
-        Task<List<Cliente>> GetAllAsync();
-        Task UpdateAsync(Cliente cliente);
+        Task<Domain.Entities.Cliente> AddAsync(Domain.Entities.Cliente cliente);
+        Task<Domain.Entities.Cliente?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Domain.Entities.Cliente>> GetAllAsync();
+        Task UpdateAsync(Domain.Entities.Cliente cliente);
         Task DeleteAsync(Guid id);
         // Outros métodos conforme necessário
     }

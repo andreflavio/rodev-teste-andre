@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore; // Adicionado para DbContext.Database.Ensur
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Domain.Entities;
+using RO.DevTest.Persistence.Repositories;
 
 namespace RO.DevTest.WebApi;
 
@@ -56,6 +58,9 @@ public class Program
         builder.Services.InjectPersistenceDependencies(builder.Configuration)
             .InjectInfrastructureDependencies();
 
+        // ** ADICIONE ESTA LINHA AQUI PARA REGISTRAR O IBaseRepository<Cliente> **
+        builder.Services.AddScoped(typeof(IBaseRepository<Cliente>), typeof(BaseRepository<Cliente>));
+
         // Configuração do MediatR
         builder.Services.AddMediatR(cfg =>
         {
@@ -63,7 +68,6 @@ public class Program
                 typeof(ApplicationLayer).Assembly, // Assembly da camada de Application
                 typeof(Program).Assembly // Assembly da camada WebApi
             );
-
         });
         // ** ADICIONE ESTAS LINHAS AQUI (Configuração da Autenticação JWT) **
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,4 +1,4 @@
-﻿Esqueleto do Projeto: C:\Users\André\teste\rodev_testnew
+﻿Esqueleto do Projeto: C:\Users\André\teste\rodev-test
 --------------------------------------------------
 [Arquivo] .gitignore
 [Arquivo] README_RotaDasOficinas.md
@@ -13,6 +13,9 @@
           [Arquivo] LoginCommandHandler.cs
           [Arquivo] LoginResponse.cs
         [Arquivo] CreateClienteCommand.cs
+        [Arquivo] CreateClienteCommandHandler.cs
+        [Arquivo] CreateClienteResult.cs
+        [Arquivo] GetAllClientesResult.cs
         [Arquivo] CreateClienteResult.cs
         [Arquivo] GetAllClientesResult.cs
           [Arquivo] CreateUserCommand.cs
