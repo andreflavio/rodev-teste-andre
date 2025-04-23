@@ -4,6 +4,7 @@
 [Arquivo] README_RotaDasOficinas.md
   [Arquivo] ApplicationLayer.cs
         [Arquivo] RO.DevTest.Application.deps.json
+    [Arquivo] IClienteRepository.cs
       [Arquivo] IIdentityAbstractor.cs
       [Arquivo] IJwtTokenGenerator.cs
         [Arquivo] IBaseRepository.cs
@@ -11,6 +12,9 @@
           [Arquivo] LoginCommand.cs
           [Arquivo] LoginCommandHandler.cs
           [Arquivo] LoginResponse.cs
+        [Arquivo] CreateClienteCommand.cs
+        [Arquivo] CreateClienteResult.cs
+        [Arquivo] GetAllClientesResult.cs
           [Arquivo] CreateUserCommand.cs
           [Arquivo] CreateUserCommandHandler.cs
           [Arquivo] CreateUserCommandValidator.cs
@@ -33,6 +37,7 @@
   [Arquivo] RO.DevTest.Application.csproj
     [Arquivo] BaseEntity.cs
         [Arquivo] RO.DevTest.Domain.deps.json
+    [Arquivo] Cliente.cs
     [Arquivo] User.cs
     [Arquivo] UserRoles.cs
     [Arquivo] ApiException.cs
