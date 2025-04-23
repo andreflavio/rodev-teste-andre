@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RO.DevTest.Application.Features.Clientes.CreateClienteCommand;
+using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,17 +15,17 @@ namespace RO.DevTest.WebApi.Controllers
     public class ClientesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IClienteRepository _clienteRepository;
 
-        public ClientesController(IMediator mediator)
+        public ClientesController(IMediator mediator, IClienteRepository clienteRepository)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
         }
 
         /// <summary>
-        /// Cria um novo cliente.
+        /// Cria um novo cliente (via parâmetros na query string).
         /// </summary>
-        /// <param name="command">Dados para criação do cliente.</param>
-        /// <returns>Resultado da criação do cliente.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateCliente([FromQuery] CreateClienteCommand command)
         {
@@ -37,61 +39,66 @@ namespace RO.DevTest.WebApi.Controllers
             return BadRequest(result.ErrorMessage);
         }
 
-
         /// <summary>
         /// Obtém um cliente pelo seu ID.
         /// </summary>
-        /// <param name="id">O ID do cliente a ser buscado.</param>
-        /// <returns>Os dados do cliente.</returns>
         [HttpGet("{id:guid}")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // Alterado para object
+        [ProducesResponseType(typeof(Cliente), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetClienteById(Guid id)
+        public async Task<IActionResult> GetClienteById(Guid id)
         {
-            // TODO: Implementar a lógica para buscar um cliente por ID
-            return NotFound(); // Temporariamente retorna NotFound
+            var cliente = await _clienteRepository.GetByIdAsync(id);
+            if (cliente == null)
+                return NotFound();
+
+            return Ok(cliente);
         }
 
         /// <summary>
         /// Lista todos os clientes.
         /// </summary>
-        /// <returns>Uma lista de todos os clientes.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)] // Alterado para IEnumerable<object>
-        public IActionResult GetAllClientes()
+        [ProducesResponseType(typeof(IEnumerable<Cliente>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllClientes()
         {
-            // TODO: Implementar a lógica para listar todos os clientes
-            return Ok(new List<string>()); // Temporariamente retorna uma lista vazia
+            var clientes = await _clienteRepository.GetAllAsync();
+            return Ok(clientes);
         }
 
         /// <summary>
         /// Atualiza um cliente existente.
         /// </summary>
-        /// <param name="id">O ID do cliente a ser atualizado.</param>
-        /// <param name="command">Dados para atualização do cliente.</param>
-        /// <returns>Resultado da atualização.</returns>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult UpdateCliente(Guid id, [FromBody] object command) // Alterado para object
+        public async Task<IActionResult> UpdateCliente(Guid id, [FromBody] Cliente updatedCliente)
         {
-            // TODO: Implementar a lógica para atualizar um cliente
-            return NotFound(); // Temporariamente retorna NotFound
+            if (id != updatedCliente.Id)
+                return BadRequest("O ID na URL e no corpo não coincidem.");
+
+            var existing = await _clienteRepository.GetByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            await _clienteRepository.UpdateAsync(updatedCliente);
+            return NoContent();
         }
 
         /// <summary>
         /// Remove um cliente pelo seu ID.
         /// </summary>
-        /// <param name="id">O ID do cliente a ser removido.</param>
-        /// <returns>Resultado da remoção.</returns>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult DeleteCliente(Guid id)
+        public async Task<IActionResult> DeleteCliente(Guid id)
         {
-            // TODO: Implementar a lógica para remover um cliente
-            return NotFound(); // Temporariamente retorna NotFound
+            var cliente = await _clienteRepository.GetByIdAsync(id);
+            if (cliente == null)
+                return NotFound();
+
+            await _clienteRepository.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

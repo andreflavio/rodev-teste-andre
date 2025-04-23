@@ -40,7 +40,7 @@ public class Program
                         .AllowAnyMethod();
                 });
 
-            // ** POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO **
+            // ** POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO ** 
             // Esta política permite qualquer origem, método e cabeçalho.
             // Use SOMENTE em ambientes de desenvolvimento/teste local.
             options.AddPolicy("DevelopmentPolicy",
@@ -53,13 +53,15 @@ public class Program
         });
         // Configuração do CORS - FIM
 
-
         // Configuração de Injeção de Dependência das Camadas
         builder.Services.InjectPersistenceDependencies(builder.Configuration)
             .InjectInfrastructureDependencies();
 
-        // ** ADICIONE ESTA LINHA AQUI PARA REGISTRAR O IBaseRepository<Cliente> **
-        builder.Services.AddScoped(typeof(IBaseRepository<Cliente>), typeof(BaseRepository<Cliente>));
+        // ** REGISTRO DO REPOSITÓRIO IClienteRepository ** ADICIONE ESTA LINHA AQUI
+        builder.Services.AddScoped<IClienteRepository, ClienteRepository>(); // Registro do repositório IClienteRepository
+        builder.Services.AddScoped<IBaseRepository<Cliente>, BaseRepository<Cliente>>(); // Caso o BaseRepository esteja sendo utilizado para outras operações
+
+
 
         // Configuração do MediatR
         builder.Services.AddMediatR(cfg =>
@@ -69,7 +71,8 @@ public class Program
                 typeof(Program).Assembly // Assembly da camada WebApi
             );
         });
-        // ** ADICIONE ESTAS LINHAS AQUI (Configuração da Autenticação JWT) **
+
+        // ** ADICIONE ESTAS LINHAS AQUI (Configuração da Autenticação JWT) ** 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
