@@ -25,17 +25,18 @@ namespace RO.DevTest.WebApi.Controllers
         /// <param name="command">Dados para criação do cliente.</param>
         /// <returns>Resultado da criação do cliente.</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(CreateClienteResult), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateCliente([FromQuery] CreateClienteCommand command)
         {
             var result = await _mediator.Send(command);
-            if (result.Success && result.ClienteId != 0) // Ajuste na condição
+
+            if (result.Success && result.ClienteId != Guid.Empty)
             {
                 return CreatedAtAction(nameof(GetClienteById), new { id = result.ClienteId }, result);
             }
+
             return BadRequest(result.ErrorMessage);
         }
+
 
         /// <summary>
         /// Obtém um cliente pelo seu ID.
