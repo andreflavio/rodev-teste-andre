@@ -1,0 +1,5 @@
+
+namespace RO.DevTest.Application.Features.Clientes.Results
+{
+    public record CreateClienteResult(bool Success, string? ErrorMessage = null, Guid? ClienteId = null);
+}
