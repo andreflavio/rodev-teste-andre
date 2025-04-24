@@ -21,8 +21,4 @@ namespace RO.DevTest.Application.Features.Produtos.Commands.CreateProdutoCommand
             };
         }
     }
-
-    public class CreateProdutoResult
-    {
-    }
 }
