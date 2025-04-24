@@ -76,5 +76,12 @@ namespace RO.DevTest.Persistence.Repositories
             _context.Produtos.Update(entity);
             _context.SaveChanges();
         }
+
+        public async Task UpdateAsync(Produto produto)
+        {
+            _context.Produtos.Update(produto);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

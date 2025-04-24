@@ -1,8 +1,6 @@
-namespace RO.DevTest.Application.Features.Produtos
+public class UpdateProdutoResult
 {
-    public class UpdateProdutoResult
-    {
-        public Guid Id { get; set; }  // Alterado para Guid
-        public bool Sucesso { get; set; }
-    }
+    public Guid Id { get; set; }
+    public bool Sucesso { get; set; }
+    public string? Mensagem { get; set; }
 }

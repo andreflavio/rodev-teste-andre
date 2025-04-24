@@ -15,5 +15,6 @@ namespace RO.DevTest.Application.Contracts.Persistance.Repositories
 
         // Novo método para consultas com IQueryable (necessário para filtros, ordenação e paginação)
         IQueryable<Produto> Query();
+        Task UpdateAsync(Produto produto);
     }
 }
