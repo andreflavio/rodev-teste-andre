@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RO.DevTest.Application.Features.Produtos;
 using RO.DevTest.Application.Features.Produtos.Queries;
+using RO.DevTest.Application.Features.Produtos.Commands;
 
 namespace RO.DevTest.WebApi.Controllers
 {
@@ -101,7 +102,6 @@ namespace RO.DevTest.WebApi.Controllers
             }
         }
 
-
         /// <summary>
         /// Atualiza um produto existente.
         /// </summary>
@@ -128,20 +128,17 @@ namespace RO.DevTest.WebApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Remove um produto pelo seu ID.
-        /// </summary>
-        [HttpDelete("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduto(Guid id)
         {
-            var produto = await _produtoRepository.GetByIdAsync(id);
-            if (produto == null)
+            var resultado = await _mediator.Send(new DeleteProdutoCommand(id));
+
+            if (!resultado)
                 return NotFound();
 
-            await _produtoRepository.DeleteAsync(id);
             return NoContent();
         }
+
+
     }
 }

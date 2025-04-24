@@ -25,7 +25,6 @@ namespace RO.DevTest.Persistence.Repositories
             return _context.Produtos.AsQueryable();
         }
 
-
         public async Task<Produto> CreateAsync(Produto entity, CancellationToken cancellationToken = default)
         {
             await _context.Produtos.AddAsync(entity, cancellationToken);
@@ -39,6 +38,7 @@ namespace RO.DevTest.Persistence.Repositories
             _context.SaveChanges();
         }
 
+        // Remover a duplicação aqui: 
         public async Task DeleteAsync(Guid id)
         {
             var produto = await _context.Produtos.FindAsync(id);
@@ -82,6 +82,5 @@ namespace RO.DevTest.Persistence.Repositories
             _context.Produtos.Update(produto);
             await _context.SaveChangesAsync();
         }
-
     }
 }
