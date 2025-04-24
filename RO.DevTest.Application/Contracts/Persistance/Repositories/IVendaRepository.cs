@@ -4,7 +4,11 @@ namespace RO.DevTest.Application.Contracts.Persistance.Repositories
 {
     public interface IVendaRepository : IBaseRepository<Venda>
     {
-        // Métodos específicos podem ser definidos aqui
+        Task<int> CountAsync();
+        Task DeleteAsync(Venda vendaExistente);
+        Task<Venda?> GetByIdAsync(Guid id);// Métodos específicos podem ser definidos aqui
+        Task<List<Venda>> GetVendasPaginated(int page, int pageSize);
+
     }
 }
 
