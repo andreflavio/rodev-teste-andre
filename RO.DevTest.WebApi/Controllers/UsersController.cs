@@ -91,6 +91,7 @@ namespace RO.DevTest.WebApi.Controllers
         /// <param name="id">O ID (Guid) do usuário a ser atualizado.</param>
         /// <param name="command">Dados para atualização do usuário.</param>
         /// <returns>Resultado da atualização do usuário.</returns>
+
         [HttpPut("{id:guid}")]
         [ProducesResponseType(typeof(UpdateUserResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
