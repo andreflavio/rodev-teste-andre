@@ -7,6 +7,7 @@ using RO.DevTest.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RO.DevTest.Application.Features.Clientes.UpdateClienteCommand;
 
 namespace RO.DevTest.WebApi.Controllers
 {
@@ -65,25 +66,29 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(clientes);
         }
 
-        /// <summary>
-        /// Atualiza um cliente existente.
-        /// </summary>
         [HttpPut("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(UpdateClienteResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateCliente(Guid id, [FromBody] Cliente updatedCliente)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateCliente(Guid id, [FromBody] UpdateClienteCommand command)
         {
-            if (id != updatedCliente.Id)
-                return BadRequest("O ID na URL e no corpo não coincidem.");
+            if (id != command.Id)
+            {
+                return BadRequest("O ID na rota não corresponde ao ID no corpo da requisição.");
+            }
 
-            var existing = await _clienteRepository.GetByIdAsync(id);
-            if (existing == null)
-                return NotFound();
-
-            await _clienteRepository.UpdateAsync(updatedCliente);
-            return NoContent();
+            try
+            {
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao atualizar cliente: {ex}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro inesperado ao processar a solicitação.");
+            }
         }
+
 
         /// <summary>
         /// Remove um cliente pelo seu ID.
