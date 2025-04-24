@@ -1,6 +1,9 @@
 using MediatR;
+using RO.DevTest.Application.Features.Produtos.Commands.CreateProdutoCommand;
 
-namespace RO.DevTest.Application.Features.Produtos.Commands.CreateProdutoCommand
+namespace RO.DevTest.Application.Features.Produtos.CreateProdutoCommand
+
+
 {
     public class CreateProdutoCommand : IRequest<CreateProdutoResult>
     {

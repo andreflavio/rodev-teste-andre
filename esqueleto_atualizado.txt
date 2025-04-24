@@ -23,6 +23,16 @@
         [Arquivo] UpdateClienteCommand.cs
         [Arquivo] UpdateClienteCommandHandler.cs
         [Arquivo] UpdateClienteResult.cs
+        [Arquivo] CreateProdutoCommand.cs
+        [Arquivo] CreateProdutoCommandHandler.cs
+      [Arquivo] CreateProdutoResult.cs
+      [Arquivo] DeleteProdutoCommand.cs
+        [Arquivo] GetAllProdutosQuery.cs
+        [Arquivo] GetAllUsersQuery.cs
+        [Arquivo] GetProdutoByIdQuery.cs
+        [Arquivo] GetProdutoByIdQueryHandler.cs
+      [Arquivo] UpdateProdutoCommand.cs
+      [Arquivo] UpdateProdutoCommandHandler.cs
           [Arquivo] CreateUserCommand.cs
           [Arquivo] CreateUserCommandHandler.cs
           [Arquivo] CreateUserCommandValidator.cs
@@ -36,6 +46,9 @@
           [Arquivo] UpdateUserCommandHandler.cs
           [Arquivo] UpdateUserCommandValidator.cs
           [Arquivo] UpdateUserResult.cs
+          [Arquivo] CreateVendaCommand.cs
+          [Arquivo] CreateVendaCommandHandler.cs
+          [Arquivo] CreateVendaResult.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Application.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Application.GlobalUsings.g.cs
@@ -46,7 +59,10 @@
     [Arquivo] BaseEntity.cs
         [Arquivo] RO.DevTest.Domain.deps.json
     [Arquivo] Cliente.cs
+    [Arquivo] ItemVenda.cs
+    [Arquivo] Produto.cs
     [Arquivo] User.cs
+    [Arquivo] Venda.cs
     [Arquivo] UserRoles.cs
     [Arquivo] ApiException.cs
     [Arquivo] BadRequestException.cs
@@ -75,6 +91,8 @@
     [Arquivo] PersistenceDependencyInjector.cs
     [Arquivo] 20250423184617_InitialCreate.cs
     [Arquivo] 20250423184617_InitialCreate.Designer.cs
+    [Arquivo] 20250424112648_AddProdutoEVendaV3.cs
+    [Arquivo] 20250424112648_AddProdutoEVendaV3.Designer.cs
     [Arquivo] DefaultContextModelSnapshot.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Persistence.AssemblyInfo.cs
@@ -88,23 +106,12 @@
     [Arquivo] UserRepository.cs
   [Arquivo] RO.DevTest.Persistence.csproj
 [Arquivo] RO.DevTest.sln
-        [Arquivo] appsettings.Development.json
-        [Arquivo] appsettings.json
-        [Arquivo] MvcTestingAppManifest.json
         [Arquivo] RO.DevTest.Application.deps.json
         [Arquivo] RO.DevTest.Domain.deps.json
         [Arquivo] RO.DevTest.Infrastructure.deps.json
         [Arquivo] RO.DevTest.Persistence.deps.json
-        [Arquivo] RO.DevTest.Tests.deps.json
-        [Arquivo] RO.DevTest.Tests.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.deps.json
-        [Arquivo] RO.DevTest.WebApi.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.staticwebassets.runtime.json
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
-        [Arquivo] MvcTestingAppManifest.json
-        [Arquivo] RO.DevTest.Tests.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Tests.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Tests.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Tests.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Tests.csproj

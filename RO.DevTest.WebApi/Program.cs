@@ -60,6 +60,8 @@ public class Program
         // ** REGISTRO DO REPOSITÓRIO IClienteRepository ** ADICIONE ESTA LINHA AQUI
         builder.Services.AddScoped<IClienteRepository, ClienteRepository>(); // Registro do repositório IClienteRepository
         builder.Services.AddScoped<IBaseRepository<Cliente>, BaseRepository<Cliente>>(); // Caso o BaseRepository esteja sendo utilizado para outras operações
+        builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();  // Registro do repositório de Produto
+        builder.Services.AddScoped<IVendaRepository, VendaRepository>();    // Registro do repositório de Venda
 
 
 
