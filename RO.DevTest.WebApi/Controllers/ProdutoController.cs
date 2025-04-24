@@ -25,22 +25,29 @@ namespace RO.DevTest.WebApi.Controllers
             _produtoRepository = produtoRepository ?? throw new ArgumentNullException(nameof(produtoRepository));
         }
 
-        /// <summary>
         /// Cria um novo produto via query string.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateProduto([FromQuery] CreateProdutoCommand command)
+        public async Task<IActionResult> CreateProduto([FromBody] CreateProdutoCommand command)
         {
             var result = await _mediator.Send(command);
 
-            // Corrigindo as propriedades: "Successo" -> "Sucesso", "ProdutoId" -> "Id"
-            if (result.Sucesso && result.Id != 0) // '0' para verificar se o ID foi corretamente atribuído
+            // Verifique se a criação foi bem-sucedida e se o ID foi gerado corretamente
+            if (result.Sucesso && result.Id != Guid.Empty) // Verificando se o ID não está vazio (Guid.Empty)
             {
                 return CreatedAtAction(nameof(GetProdutoById), new { id = result.Id }, result);
             }
 
-            return BadRequest(result.ErrorMessage);
+            // Caso contrário, retorne uma BadRequest com uma resposta de erro amigável
+            var errorResponse = new
+            {
+                Message = "Erro ao criar o produto.",
+                Details = new List<string> { result.ErrorMessage ?? "Erro desconhecido. Tente novamente mais tarde." }
+            };
+
+            return BadRequest(errorResponse);
         }
+
 
 
         /// <summary>

@@ -52,6 +52,7 @@
           [Arquivo] CreateVendaCommand.cs
           [Arquivo] CreateVendaCommandHandler.cs
           [Arquivo] CreateVendaResult.cs
+        [Arquivo] UpdateVendaCommand.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Application.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Application.GlobalUsings.g.cs

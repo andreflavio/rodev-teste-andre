@@ -1,9 +1,7 @@
 using MediatR;
-using RO.DevTest.Application.Features.Produtos.Commands.CreateProdutoCommand;
+using RO.DevTest.Application.Features.Produtos; // <- Importa CreateProdutoResult
 
 namespace RO.DevTest.Application.Features.Produtos.CreateProdutoCommand
-
-
 {
     public class CreateProdutoCommand : IRequest<CreateProdutoResult>
     {
@@ -12,7 +10,6 @@ namespace RO.DevTest.Application.Features.Produtos.CreateProdutoCommand
         public decimal Preco { get; set; }
         public int Estoque { get; set; }
 
-        // Método que retorna a entidade Produto pronta para ser salva no banco de dados
         public Domain.Entities.Produto AssignTo()
         {
             return new Domain.Entities.Produto
