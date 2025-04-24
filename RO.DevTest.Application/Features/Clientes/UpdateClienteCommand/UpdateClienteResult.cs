@@ -1,4 +1,4 @@
-namespace RO.DevTest.Application.Features.Clientes.Commands.UpdateClienteCommand
+namespace RO.DevTest.Application.Features.Clientes.UpdateClienteCommand
 {
     public class UpdateClienteResult
     {
