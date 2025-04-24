@@ -4,10 +4,10 @@
 [Arquivo] README_RotaDasOficinas.md
   [Arquivo] ApplicationLayer.cs
         [Arquivo] RO.DevTest.Application.deps.json
-    [Arquivo] IClienteRepository.cs
       [Arquivo] IIdentityAbstractor.cs
       [Arquivo] IJwtTokenGenerator.cs
         [Arquivo] IBaseRepository.cs
+        [Arquivo] IClienteRepository.cs
         [Arquivo] IUserRepository.cs
           [Arquivo] LoginCommand.cs
           [Arquivo] LoginCommandHandler.cs
@@ -15,6 +15,9 @@
         [Arquivo] CreateClienteCommand.cs
         [Arquivo] CreateClienteCommandHandler.cs
         [Arquivo] CreateClienteResult.cs
+        [Arquivo] GetAllClientesResult.cs
+        [Arquivo] GetAllClientesQuery.cs
+        [Arquivo] GetAllClientesQueryHandler.cs
         [Arquivo] GetAllClientesResult.cs
         [Arquivo] GetAllClientesResult.cs
           [Arquivo] CreateUserCommand.cs
@@ -77,27 +80,18 @@
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Persistence.csproj.nuget.dgspec.json
     [Arquivo] BaseRepository.cs
+    [Arquivo] ClienteRepository.cs
     [Arquivo] DefaultContextFactory.cs
     [Arquivo] UserRepository.cs
   [Arquivo] RO.DevTest.Persistence.csproj
 [Arquivo] RO.DevTest.sln
-        [Arquivo] appsettings.Development.json
-        [Arquivo] appsettings.json
-        [Arquivo] MvcTestingAppManifest.json
         [Arquivo] RO.DevTest.Application.deps.json
         [Arquivo] RO.DevTest.Domain.deps.json
         [Arquivo] RO.DevTest.Infrastructure.deps.json
         [Arquivo] RO.DevTest.Persistence.deps.json
-        [Arquivo] RO.DevTest.Tests.deps.json
-        [Arquivo] RO.DevTest.Tests.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.deps.json
-        [Arquivo] RO.DevTest.WebApi.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.staticwebassets.runtime.json
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
-        [Arquivo] MvcTestingAppManifest.json
         [Arquivo] RO.DevTest.Tests.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Tests.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Tests.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Tests.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Tests.csproj

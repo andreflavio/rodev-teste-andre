@@ -19,7 +19,7 @@ namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/user")]
-    [OpenApiTags("Users")]
+
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -53,8 +53,8 @@ namespace RO.DevTest.WebApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<GetAllUsersResult>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<GetAllUsersResult>>> GetAllUsers(
-            [FromQuery] string? name,
-            [FromQuery] string? userName)
+    [FromQuery] string? name,
+    [FromQuery] string? userName)
         {
             var query = new GetAllUsersCommand
             {
@@ -63,8 +63,27 @@ namespace RO.DevTest.WebApi.Controllers
             };
 
             var response = await _mediator.Send(query);
-            return Ok(response);
+
+            if (response == null || !response.Any())
+            {
+                // Nenhum usuário encontrado
+                return NotFound(new
+                {
+                    Message = "Nenhum usuário encontrado com os parâmetros informados.",
+                    Status = "Not Found",
+                    Data = response
+                });
+            }
+
+            // Usuários encontrados com sucesso
+            return Ok(new
+            {
+                Message = "Usuários encontrados com sucesso.",
+                Status = "Success",
+                Data = response
+            });
         }
+
 
         /// <summary>
         /// Atualiza um usuário existente.
