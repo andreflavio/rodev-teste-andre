@@ -12,5 +12,8 @@ namespace RO.DevTest.Application.Contracts.Persistance.Repositories
 
         // Método para deletar um produto
         Task DeleteAsync(Guid id);  // Implementação assíncrona do delete
+
+        // Novo método para consultas com IQueryable (necessário para filtros, ordenação e paginação)
+        IQueryable<Produto> Query();
     }
 }

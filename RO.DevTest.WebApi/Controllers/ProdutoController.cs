@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RO.DevTest.Application.Features.Produtos;
-
+using RO.DevTest.Application.Features.Produtos.Queries;
 
 namespace RO.DevTest.WebApi.Controllers
 {
@@ -25,6 +25,7 @@ namespace RO.DevTest.WebApi.Controllers
             _produtoRepository = produtoRepository ?? throw new ArgumentNullException(nameof(produtoRepository));
         }
 
+        /// <summary>
         /// Cria um novo produto via query string.
         /// </summary>
         [HttpPost]
@@ -48,25 +49,24 @@ namespace RO.DevTest.WebApi.Controllers
             return BadRequest(errorResponse);
         }
 
-
-
         /// <summary>
-        /// Obtém um produto pelo seu ID.
+        /// Retorna um produto específico pelo seu ID.
         /// </summary>
         [HttpGet("{id:guid}")]
-        [ProducesResponseType(typeof(Produto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetProdutoByIdResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProdutoById(Guid id)
         {
-            var produto = await _produtoRepository.GetByIdAsync(id);
-            if (produto == null)
+            var result = await _mediator.Send(new GetProdutoByIdQuery(id));
+
+            if (result == null)
                 return NotFound();
 
-            return Ok(produto);
+            return Ok(result);
         }
 
         /// <summary>
-        /// Lista todos os produtos.
+        /// Retorna todos os produtos cadastrados.
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Produto>), StatusCodes.Status200OK)]
@@ -75,6 +75,32 @@ namespace RO.DevTest.WebApi.Controllers
             var produtos = await _produtoRepository.GetAllAsync();
             return Ok(produtos);
         }
+
+        [HttpGet("buscar")]
+        [ProducesResponseType(typeof(IEnumerable<Produto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetProdutos([FromQuery] GetProdutosQuery request)
+        {
+            // Validando os parâmetros de página e tamanho da página
+            if (request.Page <= 0 || request.PageSize <= 0)
+            {
+                return BadRequest("Página e tamanho da página devem ser maiores que 0.");
+            }
+
+            try
+            {
+                // Aqui, o MediatR enviará a consulta para o handler adequado
+                var produtos = await _mediator.Send(request);
+
+                // Retorna os produtos encontrados
+                return Ok(produtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erro: {ex.Message}");
+            }
+        }
+
 
         /// <summary>
         /// Atualiza um produto existente.
