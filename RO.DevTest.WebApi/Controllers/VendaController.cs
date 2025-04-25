@@ -23,7 +23,7 @@ namespace RO.DevTest.WebApi.Controllers
             _vendaRepository = vendaRepository;
         }
 
-        // POST: api/vendas
+        // POST: api/Venda
         [HttpPost]
         public async Task<IActionResult> CreateVenda([FromBody] CreateVendaCommand command)
         {
@@ -31,13 +31,18 @@ namespace RO.DevTest.WebApi.Controllers
                 return BadRequest("Comando de criação de venda não pode ser nulo.");
 
             var result = await _mediator.Send(command);
-            if (result == null)
-                return StatusCode(500, "Erro ao criar a venda.");
+            if (result == null || !result.Success)
+                return BadRequest(result?.Message ?? "Erro ao criar a venda.");
 
-            return CreatedAtAction(nameof(GetVendaById), new { id = result.VendaId }, result);
+            return CreatedAtAction(nameof(GetVendaById), new { id = result.VendaId }, new
+            {
+                result.Success,
+                result.VendaId,
+                result.Message
+            });
         }
 
-        // GET: api/vendas/{id}
+        // GET: api/Venda/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVendaById(Guid id)
         {
@@ -49,7 +54,7 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(venda);
         }
 
-        // GET: api/vendas (Paginação)
+        // GET: api/Venda (Paginação)
         [HttpGet]
         public async Task<IActionResult> GetVendas([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -84,7 +89,7 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(result);
         }
 
-        // PUT: api/vendas/{id}
+        // PUT: api/Venda/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVenda(Guid id, [FromBody] UpdateVendaCommand command)
         {
@@ -102,7 +107,7 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(result);
         }
 
-        // DELETE: api/vendas/{id}
+        // DELETE: api/Venda/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVenda(Guid id)
         {
