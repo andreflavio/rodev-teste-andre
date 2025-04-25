@@ -1,0 +1,16 @@
+/*using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace RO.DevTest.Persistence;
+
+public class DefaultContextFactory : IDesignTimeDbContextFactory<DefaultContext>
+{
+    public DefaultContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<DefaultContext>();
+        optionsBuilder.UseNpgsql("Host=localhost;Database=rodevtest;Username=postgres;Password=xxxxx");
+
+        return new DefaultContext(optionsBuilder.Options);
+    }
+}
+*/

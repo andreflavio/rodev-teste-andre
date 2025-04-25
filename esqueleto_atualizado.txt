@@ -1,6 +1,7 @@
-﻿Esqueleto do Projeto: C:\Users\André\teste\rodev-test
+﻿Esqueleto do Projeto: C:\Users\André\teste1\rodev
 --------------------------------------------------
 [Arquivo] .gitignore
+[Arquivo] appsettings.templateMODELO.json
 [Arquivo] README_RotaDasOficinas.md
   [Arquivo] ApplicationLayer.cs
         [Arquivo] RO.DevTest.Application.deps.json
@@ -54,7 +55,9 @@
           [Arquivo] CreateVendaCommand.cs
           [Arquivo] CreateVendaCommandHandler.cs
           [Arquivo] CreateVendaResult.cs
+          [Arquivo] UpdateVendaCommandHandler.cs
         [Arquivo] UpdateVendaCommand.cs
+        [Arquivo] UpdateVendaCommandHandler.cs
         [Arquivo] GetAllVendasQuery.cs
         [Arquivo] GetAllVendasQueryHandler.cs
         [Arquivo] GetAllVendasResult.cs
@@ -96,10 +99,11 @@
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Infrastructure.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Infrastructure.csproj
-  [Arquivo] appsettings.json
         [Arquivo] RO.DevTest.Persistence.deps.json
         [Arquivo] RO.DevTest.Persistence.runtimeconfig.json
   [Arquivo] DefaultContext.cs
+  [Arquivo] DefaultContextFactory.cs
+  [Arquivo] DefaultContextFactoryMODELO.cs
     [Arquivo] PersistenceDependencyInjector.cs
     [Arquivo] 20250423184617_InitialCreate.cs
     [Arquivo] 20250423184617_InitialCreate.Designer.cs
@@ -114,29 +118,14 @@
     [Arquivo] RO.DevTest.Persistence.csproj.nuget.dgspec.json
     [Arquivo] BaseRepository.cs
     [Arquivo] ClienteRepository.cs
-    [Arquivo] DefaultContextFactory.cs
     [Arquivo] ProdutoRepository.cs
     [Arquivo] UserRepository.cs
     [Arquivo] VendaRepository.cs
   [Arquivo] RO.DevTest.Persistence.csproj
 [Arquivo] RO.DevTest.sln
-        [Arquivo] appsettings.Development.json
-        [Arquivo] appsettings.json
-        [Arquivo] MvcTestingAppManifest.json
-        [Arquivo] RO.DevTest.Application.deps.json
-        [Arquivo] RO.DevTest.Domain.deps.json
-        [Arquivo] RO.DevTest.Infrastructure.deps.json
-        [Arquivo] RO.DevTest.Persistence.deps.json
-        [Arquivo] RO.DevTest.Tests.deps.json
-        [Arquivo] RO.DevTest.Tests.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.deps.json
-        [Arquivo] RO.DevTest.WebApi.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.staticwebassets.runtime.json
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
-        [Arquivo] MvcTestingAppManifest.json
         [Arquivo] RO.DevTest.Tests.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Tests.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Tests.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Tests.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Tests.csproj
