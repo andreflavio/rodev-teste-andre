@@ -104,7 +104,13 @@ namespace RO.DevTest.WebApi.Controllers
             if (result == null)
                 return StatusCode(500, "Erro ao atualizar a venda.");
 
-            return Ok(result);
+            if (result.Success)
+            {
+                result.Message = "Venda atualizada com sucesso.";
+                return Ok(result);
+            }
+
+            return BadRequest(result);
         }
 
         // DELETE: api/Venda/{id}
