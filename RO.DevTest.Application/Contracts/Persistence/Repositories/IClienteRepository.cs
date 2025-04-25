@@ -1,4 +1,4 @@
-namespace RO.DevTest.Application.Contracts.Persistance.Repositories
+namespace RO.DevTest.Application.Contracts.Persistence.Repositories
 
 {
     public interface IClienteRepository

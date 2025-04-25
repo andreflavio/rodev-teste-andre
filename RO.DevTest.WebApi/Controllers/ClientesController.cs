@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RO.DevTest.Application.Features.Clientes.CreateClienteCommand;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using RO.DevTest.Domain.Entities;
 using System;
 using System.Collections.Generic;

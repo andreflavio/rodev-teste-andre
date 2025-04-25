@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
 
-namespace RO.DevTest.Application.Contracts.Persistance.Repositories;
+namespace RO.DevTest.Application.Contracts.Persistence.Repositories;
 
-public interface IBaseRepository<T> where T : class {
+
+public interface IBaseRepository<T> where T : class
+{
 
     /// <summary>
     /// Creates a new entity in the database

@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration; // Adicionar este using para IConfiguration
-using System; // Adicionar este using para Console
-using RO.DevTest.Application.Contracts.Persistance.Repositories; // Adicionar using para IUserRepository
-using RO.DevTest.Persistence.Repositories; // Adicionar using para UserRepository
-using RO.DevTest.Persistence; // Adicionar using para DefaultContext (se DefaultContext estiver neste namespace)
+using RO.DevTest.Persistence.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories; // Adicionar using para UserRepository
 
 namespace RO.DevTest.Persistence.IoC; // Note: O namespace é RO.DevTest.Persistence.IoC
 
@@ -59,7 +57,7 @@ public static class PersistenceDependencyInjector
         // --- REGISTRO DOS REPOSITÓRIOS ---
         // ** ESTA É A LINHA ESSENCIAL PARA RESOLVER O SEU ERRO DE DI **
         // Registra a interface IUserRepository para ser resolvida pela classe concreta UserRepository
-        services.AddScoped<IUserRepository, UserRepository>(); // <-- Corrigido: UserRepository no segundo tipo
+        IServiceCollection serviceCollection = services.AddScoped<IUserRepository, UserRepository>(); // <-- Corrigido: UserRepository no segundo tipo
 
         // Se você tiver outros repositórios específicos (além da BaseRepository),
         // registre-os aqui também. Ex:

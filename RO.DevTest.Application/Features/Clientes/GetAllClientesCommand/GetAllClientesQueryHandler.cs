@@ -3,7 +3,7 @@ using RO.DevTest.Application.Features.Clientes.GetAllClientesCommand;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace RO.DevTest.Application.Features.Clientes.GetAllClientesCommand

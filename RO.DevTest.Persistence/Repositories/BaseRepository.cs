@@ -1,26 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using System.Linq.Expressions;
 
 namespace RO.DevTest.Persistence.Repositories;
 
-public class BaseRepository<T>(DefaultContext defaultContext) : IBaseRepository<T> where T : class {
+public class BaseRepository<T>(DefaultContext defaultContext) : IBaseRepository<T> where T : class
+{
     private readonly DefaultContext _defaultContext = defaultContext;
 
     protected DefaultContext Context { get => _defaultContext; }
 
-    public async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default) {
+    public async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
+    {
         await Context.Set<T>().AddAsync(entity, cancellationToken);
         await Context.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
-    public async void Update(T entity) {
+    public async void Update(T entity)
+    {
         Context.Set<T>().Update(entity);
         await Context.SaveChangesAsync();
     }
 
-    public async void Delete(T entity) {
+    public async void Delete(T entity)
+    {
         Context.Set<T>().Remove(entity);
         await Context.SaveChangesAsync();
     }
@@ -45,10 +49,12 @@ public class BaseRepository<T>(DefaultContext defaultContext) : IBaseRepository<
     private IQueryable<T> GetQueryWithIncludes(
         Expression<Func<T, bool>> predicate,
         params Expression<Func<T, object>>[] includes
-    ) {
+    )
+    {
         IQueryable<T> baseQuery = GetWhereQuery(predicate);
 
-        foreach(Expression<Func<T, object>> include in includes) {
+        foreach (Expression<Func<T, object>> include in includes)
+        {
             baseQuery = baseQuery.Include(include);
         }
 
@@ -66,10 +72,12 @@ public class BaseRepository<T>(DefaultContext defaultContext) : IBaseRepository<
     /// <returns>S
     /// The <see cref="IQueryable{T}"/>
     /// </returns>
-    private IQueryable<T> GetWhereQuery(Expression<Func<T, bool>> predicate) {
+    private IQueryable<T> GetWhereQuery(Expression<Func<T, bool>> predicate)
+    {
         IQueryable<T> baseQuery = Context.Set<T>();
 
-        if(predicate is not null) {
+        if (predicate is not null)
+        {
             baseQuery = baseQuery.Where(predicate);
         }
 

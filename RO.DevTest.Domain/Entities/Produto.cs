@@ -8,7 +8,7 @@ namespace RO.DevTest.Domain.Entities
         public string Nome { get; set; } = string.Empty;  // Nome do produto
         public decimal Preco { get; set; }  // Preço do produto
         public int Estoque { get; set; }  // Quantidade em estoque
-        public string Descricao { get; set; }
+        public required string Descricao { get; set; }
 
         // Outras propriedades relevantes para o produto podem ser adicionadas aqui
     }

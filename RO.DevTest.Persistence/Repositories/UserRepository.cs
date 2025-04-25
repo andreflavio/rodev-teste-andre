@@ -1,11 +1,10 @@
-﻿// No arquivo UserRepository.cs
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
-using RO.DevTest.Domain.Entities;
+﻿using RO.DevTest.Domain.Entities;
 using Microsoft.EntityFrameworkCore; // <<-- Garanta que este using está presente
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RO.DevTest.Persistence; // Necessário para DefaultContext
+using RO.DevTest.Application.Contracts.Persistence.Repositories;  // Importando a interface IUserRepository
 
 namespace RO.DevTest.Persistence.Repositories
 {
@@ -24,26 +23,17 @@ namespace RO.DevTest.Persistence.Repositories
 
             if (!string.IsNullOrEmpty(name))
             {
-                // ** CORREÇÃO AQUI: Usar EF.Functions.ILike para busca case-insensitive no banco **
-                // O segundo parâmetro é o padrão de busca com coringas: % para qualquer sequência, _ para um único caractere.
-                // name + "%"  => começa com 'name'
-                // "%" + name  => termina com 'name'
-                // "%" + name + "%" => contém 'name' (o que .Contains faz)
                 query = query.Where(u => u.Name != null && EF.Functions.ILike(u.Name, $"%{name}%"));
             }
 
             if (!string.IsNullOrEmpty(userName))
             {
-                // ** CORREÇÃO AQUI: Usar EF.Functions.ILike para busca case-insensitive no banco **
-                // Usando "%" + userName + "%" para replicar o comportamento de Contains
                 query = query.Where(u => u.UserName != null && EF.Functions.ILike(u.UserName, $"%{userName}%"));
             }
-            // Adicione lógica de filtro para outros campos aqui usando EF.Functions.ILike se precisar de case-insensitive "contém" ou "começa com", etc.
-            // Para igualdade case-insensitive, string.Equals(..., StringComparison.OrdinalIgnoreCase) geralmente funciona com EF Core mais recente.
 
             return await query.ToListAsync();
         }
 
-        // ... outros métodos ...
+        // Outros métodos do repositório aqui...
     }
 }

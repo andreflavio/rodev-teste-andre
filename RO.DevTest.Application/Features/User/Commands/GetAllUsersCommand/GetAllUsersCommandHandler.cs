@@ -1,6 +1,6 @@
 // No arquivo GetAllUsersCommandHandler.cs
 using MediatR;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

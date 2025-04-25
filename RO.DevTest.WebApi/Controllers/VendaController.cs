@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using RO.DevTest.Application.Features.Vendas.Commands.CreateVendaCommand;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using RO.DevTest.Application.Features.Vendas.Commands;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
+using RO.DevTest.Application.Features.Vendas.Queries;
+using RO.DevTest.Domain.Entities;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace RO.DevTest.WebApi.Controllers
 {
@@ -56,7 +58,7 @@ namespace RO.DevTest.WebApi.Controllers
 
             var totalVendas = await _vendaRepository.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalVendas / pageSize);
-            var vendas = await _vendaRepository.GetVendasPaginated(page, pageSize);
+            var vendas = await _vendaRepository.GetAllAsync(page, pageSize);
 
             var result = new
             {
@@ -64,7 +66,19 @@ namespace RO.DevTest.WebApi.Controllers
                 TotalPages = totalPages,
                 CurrentPage = page,
                 PageSize = pageSize,
-                Vendas = vendas
+                Vendas = vendas.Select(v => new GetAllVendasResult
+                {
+                    Id = v.Id,
+                    ClienteId = v.ClienteId,
+                    DataVenda = v.DataVenda,
+                    Total = v.Total,
+                    Itens = v.Itens.Select(i => new VendaItemDto
+                    {
+                        ProdutoId = i.ProdutoId,
+                        Quantidade = i.Quantidade,
+                        PrecoUnitario = i.PrecoUnitario
+                    }).ToList()
+                }).ToList()
             };
 
             return Ok(result);
@@ -96,10 +110,9 @@ namespace RO.DevTest.WebApi.Controllers
             if (vendaExistente == null)
                 return NotFound($"Venda com ID {id} não encontrada.");
 
-            // Agora você pode apenas deletar via repositório
             await _vendaRepository.DeleteAsync(vendaExistente);
 
-            return NoContent();  // Retorna um código 204 indicando sucesso
+            return NoContent();
         }
     }
 }

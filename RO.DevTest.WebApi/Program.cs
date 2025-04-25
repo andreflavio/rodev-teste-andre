@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore; // Adicionado para DbContext.Database.Ensur
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Persistence.Repositories;
 

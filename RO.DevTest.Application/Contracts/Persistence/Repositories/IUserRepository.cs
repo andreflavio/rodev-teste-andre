@@ -1,11 +1,11 @@
-﻿// Caminho esperado: RO.DevTest.Application\Contracts\Persistance\Repositories\IUserRepository.cs
+﻿// Caminho esperado: RO.DevTest.Application\Contracts\Persistence\Repositories\IUserRepository.cs
 
 using RO.DevTest.Domain.Entities; // Necessário para IEnumerable<User>
 using System.Collections.Generic;
 using System.Threading.Tasks;
 // Remova using RO.DevTest.Application.Features.User.Commands.GetAllUsersCommand; se não for usado para mais nada
 
-namespace RO.DevTest.Application.Contracts.Persistance.Repositories
+namespace RO.DevTest.Application.Contracts.Persistence.Repositories
 {
     public interface IUserRepository : IBaseRepository<User>
     {

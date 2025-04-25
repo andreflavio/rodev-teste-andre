@@ -3,7 +3,6 @@
 [Arquivo] .gitignore
 [Arquivo] README_RotaDasOficinas.md
   [Arquivo] ApplicationLayer.cs
-        [Arquivo] RO.DevTest.Application.deps.json
       [Arquivo] IIdentityAbstractor.cs
       [Arquivo] IJwtTokenGenerator.cs
         [Arquivo] IBaseRepository.cs
@@ -29,10 +28,12 @@
         [Arquivo] CreateProdutoCommandHandler.cs
       [Arquivo] CreateProdutoResult.cs
       [Arquivo] DeleteProdutoCommand.cs
-        [Arquivo] GetAllProdutosQuery.cs
-        [Arquivo] GetAllUsersQuery.cs
+      [Arquivo] DeleteProdutoCommandHandler.cs
         [Arquivo] GetProdutoByIdQuery.cs
         [Arquivo] GetProdutoByIdQueryHandler.cs
+        [Arquivo] GetProdutoByIdResult.cs
+        [Arquivo] GetProdutosQuery.cs
+        [Arquivo] GetProdutosQueryHandler.cs
       [Arquivo] UpdateProdutoCommand.cs
       [Arquivo] UpdateProdutoCommandHandler.cs
       [Arquivo] UpdateProdutoResult.cs
@@ -53,6 +54,11 @@
           [Arquivo] CreateVendaCommandHandler.cs
           [Arquivo] CreateVendaResult.cs
         [Arquivo] UpdateVendaCommand.cs
+        [Arquivo] GetAllVendasQuery.cs
+        [Arquivo] GetAllVendasQueryHandler.cs
+        [Arquivo] GetAllVendasResult.cs
+        [Arquivo] GetVendaByIdQuery.cs
+        [Arquivo] GetVendaByIdQueryHandler.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Application.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Application.GlobalUsings.g.cs
@@ -78,19 +84,15 @@
     [Arquivo] RO.DevTest.Domain.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Domain.csproj
     [Arquivo] IdentityAbstractor.cs
-        [Arquivo] RO.DevTest.Infrastructure.deps.json
     [Arquivo] InfrastructureDependecyInjector.cs
   [Arquivo] JwtTokenGenerator.cs
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Infrastructure.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Infrastructure.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Infrastructure.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Infrastructure.csproj.nuget.dgspec.json
   [Arquivo] RO.DevTest.Infrastructure.csproj
   [Arquivo] appsettings.json
-        [Arquivo] RO.DevTest.Persistence.deps.json
-        [Arquivo] RO.DevTest.Persistence.runtimeconfig.json
   [Arquivo] DefaultContext.cs
     [Arquivo] PersistenceDependencyInjector.cs
     [Arquivo] 20250423184617_InitialCreate.cs
@@ -101,7 +103,6 @@
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.Persistence.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Persistence.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.Persistence.sourcelink.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Persistence.csproj.nuget.dgspec.json
     [Arquivo] BaseRepository.cs
@@ -112,11 +113,8 @@
     [Arquivo] VendaRepository.cs
   [Arquivo] RO.DevTest.Persistence.csproj
 [Arquivo] RO.DevTest.sln
-        [Arquivo] RO.DevTest.Application.deps.json
-        [Arquivo] RO.DevTest.Domain.deps.json
-        [Arquivo] RO.DevTest.Infrastructure.deps.json
-        [Arquivo] RO.DevTest.Persistence.deps.json
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+        [Arquivo] RO.DevTest.Tests.AssemblyInfo.cs
         [Arquivo] RO.DevTest.Tests.GlobalUsings.g.cs
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.Tests.csproj.nuget.dgspec.json
@@ -124,11 +122,6 @@
             [Arquivo] CreateUserCommandHandlerTests.cs
   [Arquivo] appsettings.Development.json
   [Arquivo] appsettings.json
-        [Arquivo] appsettings.Development.json
-        [Arquivo] appsettings.json
-        [Arquivo] RO.DevTest.WebApi.deps.json
-        [Arquivo] RO.DevTest.WebApi.runtimeconfig.json
-        [Arquivo] RO.DevTest.WebApi.staticwebassets.runtime.json
     [Arquivo] AuthController.cs
     [Arquivo] ClientesController.cs
     [Arquivo] ProdutoController.cs
@@ -137,10 +130,6 @@
         [Arquivo] .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
         [Arquivo] RO.DevTest.WebApi.AssemblyInfo.cs
         [Arquivo] RO.DevTest.WebApi.GlobalUsings.g.cs
-        [Arquivo] RO.DevTest.WebApi.MvcApplicationPartsAssemblyInfo.cs
-        [Arquivo] RO.DevTest.WebApi.sourcelink.json
-        [Arquivo] staticwebassets.build.json
-        [Arquivo] staticwebassets.development.json
     [Arquivo] project.assets.json
     [Arquivo] RO.DevTest.WebApi.csproj.nuget.dgspec.json
   [Arquivo] Program.cs

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Persistence;
 using System;

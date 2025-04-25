@@ -1,6 +1,6 @@
 using MediatR;
-using RO.DevTest.Application.Contracts.Persistance.Repositories;
-using RO.DevTest.Application.Features.Produtos.Queries;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 
