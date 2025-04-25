@@ -11,5 +11,6 @@ namespace RO.DevTest.Application.Contracts.Persistence.Repositories
         Task<Venda?> GetByIdAsync(Guid id);
         Task<int> CountAsync();
         Task DeleteAsync(Venda venda);
+        Task CreateAsync(Venda venda); // Adicionado para suportar criação de vendas
     }
 }

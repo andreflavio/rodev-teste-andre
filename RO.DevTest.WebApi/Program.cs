@@ -64,7 +64,6 @@ public class Program
         builder.Services.AddScoped<IVendaRepository, VendaRepository>();    // Registro do repositório de Venda
 
 
-
         // Configuração do MediatR
         builder.Services.AddMediatR(cfg =>
         {
