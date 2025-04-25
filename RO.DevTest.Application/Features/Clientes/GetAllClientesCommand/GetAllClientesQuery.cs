@@ -1,14 +1,18 @@
-namespace RO.DevTest.Application.Features.Clientes.GetAllClientesCommand
-{
-    using MediatR; // Necessário para IRequest
+namespace RO.DevTest.Application.Common;
 
-    public class GetAllClientesQuery : IRequest<List<GetAllClientesResult>>
+public class PagedResult<T>
+{
+    public List<T> Items { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public int TotalCount { get; set; }
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+
+    public PagedResult(List<T> items, int pageNumber, int pageSize, int totalCount)
     {
-        public string? Nome { get; set; }
-        public string? Email { get; set; }
-        public bool OrdemDecrescente { get; set; }
-        public string OrdenarPor { get; set; } = "Nome"; // Pode ser outro campo, como "Email", "Id", etc.
-        public int Pagina { get; set; } = 1;
-        public int TamanhoPagina { get; set; } = 10;
+        Items = items;
+        PageNumber = pageNumber;
+        PageSize = pageSize;
+        TotalCount = totalCount;
     }
 }
