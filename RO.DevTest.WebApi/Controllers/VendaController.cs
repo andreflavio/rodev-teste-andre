@@ -117,7 +117,11 @@ namespace RO.DevTest.WebApi.Controllers
 
             await _vendaRepository.DeleteAsync(vendaExistente);
 
-            return NoContent();
+            return Ok(new
+            {
+                Success = true,
+                Message = "Venda deletada com sucesso."
+            });
         }
     }
 }
