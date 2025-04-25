@@ -88,7 +88,7 @@ public interface IIdentityAbstractor
     /// <param name="user"></param>
     /// <param name="role"></param>
     /// <returns></returns>
-    Task<IdentityResult> AddToRoleAsync(User user, UserRoles role);
+    Task<IdentityResult> AddToRoleAsync(User user, UserRoles role); // <-- Mude para isto
 
     /// <summary>
     /// Deletes a <see cref="ApplicationUser"/> from the database
@@ -103,4 +103,5 @@ public interface IIdentityAbstractor
     Task<IdentityResult> UpdateUserAsync(User userToUpdate);
     Task RemoveFromRoleAsync(User userToUpdate, object originalRole);
     Task<IdentityResult> DeleteUserAsync(User userToDelete);
+
 }
