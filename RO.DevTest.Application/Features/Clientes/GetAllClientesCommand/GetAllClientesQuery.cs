@@ -1,18 +1,15 @@
-namespace RO.DevTest.Application.Common;
+using MediatR;
+using System.Collections.Generic;
 
-public class PagedResult<T>
+namespace RO.DevTest.Application.Features.Clientes.GetAllClientesCommand
 {
-    public List<T> Items { get; set; }
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalCount { get; set; }
-    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
-
-    public PagedResult(List<T> items, int pageNumber, int pageSize, int totalCount)
+    public class GetAllClientesQuery : IRequest<List<GetAllClientesResult>>
     {
-        Items = items;
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-        TotalCount = totalCount;
+        public string? Nome { get; set; }
+        public string? Email { get; set; }
+        public string OrdenarPor { get; set; } = "Nome";
+        public bool OrdemDecrescente { get; set; } = false;
+        public int Pagina { get; set; } = 1;
+        public int TamanhoPagina { get; set; } = 10;
     }
 }
