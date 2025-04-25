@@ -20,20 +20,22 @@ namespace RO.DevTest.Application.Features.Clientes.GetAllClientesCommand
             _clienteRepository = clienteRepository;
         }
 
+
         public async Task<List<GetAllClientesResult>> Handle(GetAllClientesQuery request, CancellationToken cancellationToken)
         {
-            // Usando o repositório para pegar todos os clientes
-            var clientes = await _clienteRepository.GetAllAsync();
+            // Converte para IQueryable para permitir filtragem e paginação
+            var clientes = (await _clienteRepository.GetAllAsync()).AsQueryable();
 
-            // Se você precisa aplicar filtros ou ordenação, adicione aqui antes de mapear os resultados
             if (!string.IsNullOrEmpty(request.Nome))
             {
                 clientes = clientes.Where(c => c.Nome.Contains(request.Nome));
             }
+
             if (!string.IsNullOrEmpty(request.Email))
             {
                 clientes = clientes.Where(c => c.Email.Contains(request.Email));
             }
+
             if (request.OrdemDecrescente)
             {
                 clientes = clientes.OrderByDescending(c => EF.Property<object>(c, request.OrdenarPor));
@@ -47,15 +49,17 @@ namespace RO.DevTest.Application.Features.Clientes.GetAllClientesCommand
             clientes = clientes.Skip((request.Pagina - 1) * request.TamanhoPagina)
                                .Take(request.TamanhoPagina);
 
-            // Convertendo para o formato do resultado esperado
-            var result = clientes.Select(c => new GetAllClientesResult
-            {
-                Id = c.Id,
-                Nome = c.Nome,
-                Email = c.Email
-            }).ToList();
+            var result = await clientes
+                .Select(c => new GetAllClientesResult
+                {
+                    Id = c.Id,
+                    Nome = c.Nome,
+                    Email = c.Email
+                })
+                .ToListAsync(cancellationToken); // Usa ToListAsync se estiver usando EF Core
 
             return result;
         }
+
     }
 }
