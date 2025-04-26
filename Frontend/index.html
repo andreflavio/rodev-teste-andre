@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API DevTest - Frontend Simples</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: calc(100% - 22px); /* Ajusta largura considerando padding e border */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: inline-block;
+            background: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .response-area {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9e9e9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            word-wrap: break-word; /* Quebra palavras longas */
+            max-height: 300px; /* Limita altura e adiciona scroll se necessário */
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API DevTest - Frontend Simples de Demonstração</h1>
+
+        <div class="section">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" value="admin@test.com"> </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" value="Admin123*"> </div>
+            <button id="loginButton">Login</button>
+            <div class="response-area" id="loginResponse"></div>
+        </div>
+
+        <div class="section">
+            <h2>Acessar Endpoint Protegido (/api/clientes)</h2>
+            <p>Clique no botão abaixo para tentar listar os clientes. Isso só funcionará se você tiver feito login com sucesso e tiver um token válido.</p>
+            <button id="fetchClientesButton">Listar Clientes (Protegido)</button>
+            <div class="response-area" id="clientesResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        // URL base da sua API
+        // !!! IMPORTANTE: AJUSTE ESTA URL PARA ONDE SUA API ESTÁ RODANDO (ex: http://localhost:5087) !!!
+        const API_BASE_URL = 'http://localhost:5087'; // Ajuste se a porta for diferente
+
+        const loginButton = document.getElementById('loginButton');
+        const fetchClientesButton = document.getElementById('fetchClientesButton');
+        const loginResponseArea = document.getElementById('loginResponse');
+        const clientesResponseArea = document.getElementById('clientesResponse');
+
+        let jwtToken = null; // Variável para armazenar o token JWT
+
+        // --- Função para Limpar as Áreas de Resposta ---
+        function clearResponses() {
+             loginResponseArea.innerHTML = '';
+             clientesResponseArea.innerHTML = '';
+        }
+
+
+        // --- Event Listener para o Botão de Login ---
+        loginButton.addEventListener('click', async () => {
+            clearResponses(); // Limpa respostas anteriores
+            // <<< CORREÇÃO: Use .trim() para remover espaços em branco extras no início/fim >>>
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            // <<< FIM DA CORREÇÃO >>>
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: email, password })
+
+                });
+
+                if (response.ok) { // Status 2xx (Sucesso)
+                    const data = await response.json(); // Lê como JSON se for sucesso
+                    jwtToken = data.token; // Assumindo que a resposta de sucesso tem uma propriedade 'token'
+                    loginResponseArea.innerHTML = `<span class="success">Login bem-sucedido!</span><br>Token Recebido: ${jwtToken}`;
+                    // Opcional: Salvar no localStorage para persistir entre páginas/sessões do navegador
+                    // localStorage.setItem('jwtToken', jwtToken);
+
+                } else { // Status de Erro (400, 401, 500, etc.)
+                    // Leia o corpo da resposta como texto em caso de erro
+                    const errorMessage = await response.text();
+                    jwtToken = null; // Garante que o token é null em caso de falha
+                    // Exibe o status e a mensagem de erro lida como texto
+                    loginResponseArea.innerHTML = `<span class="error">Falha no Login:</span> Status ${response.status} - ${errorMessage || response.statusText}`;
+                     // Opcional: Remover do localStorage
+                    // localStorage.removeItem('jwtToken');
+                }
+
+            } catch (error) {
+                console.error('Erro na requisição de Login:', error);
+                loginResponseArea.innerHTML = `<span class="error">Erro na requisição:</span> ${error.message}`;
+                 // Opcional: Remover do localStorage
+                // localStorage.removeItem('jwtToken');
+            }
+        });
+
+        // --- Event Listener para o Botão de Listar Clientes Protegido ---
+        fetchClientesButton.addEventListener('click', async () => {
+            clientesResponseArea.innerHTML = ''; // Limpa resposta anterior
+
+            // Opcional: Recuperar token do localStorage se estiver usando
+            // jwtToken = localStorage.getItem('jwtToken');
+
+
+            if (!jwtToken) {
+                clientesResponseArea.innerHTML = `<span class="error">Erro:</span> Nenhum token JWT disponível. Por favor, faça login primeiro.`;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/clientes`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}` // <--- Inclui o token no cabeçalho
+                        // Opcional: 'Content-Type': 'application/json', se o endpoint consumir JSON
+                    },
+                });
+
+                if (response.ok) { // Status 2xx (Sucesso)
+                     const data = await response.json(); // Lê como JSON se for sucesso
+                     clientesResponseArea.innerHTML = `<span class="success">Clientes Carregados com Sucesso:</span><br>${JSON.stringify(data, null, 2)}`;
+
+                } else { // Status de Erro (400, 401, 500, etc.)
+                    const errorMessage = await response.text(); // Lê como texto para capturar a mensagem de erro
+                     clientesResponseArea.innerHTML = `<span class="error">Erro ao Carregar Clientes:</span> Status ${response.status} - ${errorMessage || response.statusText}`;
+                     if(response.status === 401 || response.status === 403) {
+                         clientesResponseArea.innerHTML += "<br>Por favor, faça login novamente.";
+                         jwtToken = null; // Limpa o token local
+                         // localStorage.removeItem('jwtToken'); // Limpa do localStorage
+                     }
+                }
+
+            } catch (error) {
+                console.error('Erro na requisição de Clientes:', error);
+                clientesResponseArea.innerHTML = `<span class="error">Erro na requisição:</span> ${error.message}`;
+            }
+        });
+
+    </script>
+</body>
+</html>

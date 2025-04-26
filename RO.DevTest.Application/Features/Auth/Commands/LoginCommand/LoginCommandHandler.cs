@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using RO.DevTest.Application.Contracts.Infrastructure; // Para IIdentityAbstractor
-using RO.DevTest.Application.Contracts.infraes; // Para IJwtTokenGenerator
 using RO.DevTest.Application.Features.Auth.Commands.LoginCommand;
 using System.Threading;
 using System.Threading.Tasks;

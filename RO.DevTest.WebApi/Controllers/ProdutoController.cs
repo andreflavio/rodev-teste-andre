@@ -7,15 +7,17 @@ using RO.DevTest.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RO.DevTest.Application.Features.Produtos;
+using RO.DevTest.Application.Features.Produtos; // Verifique se este using é necessário ou pode ser removido
 using RO.DevTest.Application.Features.Produtos.Queries;
 using RO.DevTest.Application.Features.Produtos.Commands;
-using Microsoft.AspNetCore.Authorization; // <--- ADICIONE ESTA LINHA
+using Microsoft.AspNetCore.Authorization; // <--- Mantenha esta linha
+using System.Linq; // Necessário para Any()
+
 namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/produtos")]
-    [Authorize]
+    // [Authorize] // <<< REMOVA o Authorize daqui, pois vamos proteger por MÉTODO >>>
     public class ProdutosController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,20 +30,22 @@ namespace RO.DevTest.WebApi.Controllers
         }
 
         /// <summary>
-        /// Cria um novo produto via query string.
+        /// Cria um novo produto.
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")] // <<< ADICIONE: Requer papel Admin para CRIAR produto >>>
+        [ProducesResponseType(typeof(CreateProdutoResult), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreateProdutoResult), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateProduto([FromBody] CreateProdutoCommand command)
         {
             var result = await _mediator.Send(command);
 
-            // Verifique se a criação foi bem-sucedida e se o ID foi gerado corretamente
-            if (result.Sucesso && result.Id != Guid.Empty) // Verificando se o ID não está vazio (Guid.Empty)
+            if (result.Sucesso && result.Id != Guid.Empty)
             {
+                // Ajuste aqui para o nome correto do método GET BY ID, se necessário
                 return CreatedAtAction(nameof(GetProdutoById), new { id = result.Id }, result);
             }
 
-            // Caso contrário, retorne uma BadRequest com uma resposta de erro amigável
             var errorResponse = new
             {
                 Message = "Erro ao criar o produto.",
@@ -55,6 +59,7 @@ namespace RO.DevTest.WebApi.Controllers
         /// Retorna um produto específico pelo seu ID.
         /// </summary>
         [HttpGet("{id:guid}")]
+        [AllowAnonymous] // <<< ADICIONE: Permite acesso público para VER produto por ID >>>
         [ProducesResponseType(typeof(GetProdutoByIdResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProdutoById(Guid id)
@@ -71,6 +76,7 @@ namespace RO.DevTest.WebApi.Controllers
         /// Retorna todos os produtos cadastrados.
         /// </summary>
         [HttpGet]
+        [AllowAnonymous] // <<< ADICIONE: Permite acesso público para LISTAR todos os produtos >>>
         [ProducesResponseType(typeof(IEnumerable<Produto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllProdutos()
         {
@@ -78,12 +84,15 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(produtos);
         }
 
-        [HttpGet("buscar")]
+        /// <summary>
+        /// Busca produtos com filtros e paginação.
+        /// </summary>
+        [HttpGet("buscar")] // Mantém a rota específica
+        [AllowAnonymous] // <<< ADICIONE: Permite acesso público para BUSCAR/FILTRAR produtos (com paginação) >>>
         [ProducesResponseType(typeof(IEnumerable<Produto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProdutos([FromQuery] GetProdutosQuery request)
         {
-            // Validando os parâmetros de página e tamanho da página
             if (request.Page <= 0 || request.PageSize <= 0)
             {
                 return BadRequest("Página e tamanho da página devem ser maiores que 0.");
@@ -91,10 +100,7 @@ namespace RO.DevTest.WebApi.Controllers
 
             try
             {
-                // Aqui, o MediatR enviará a consulta para o handler adequado
                 var produtos = await _mediator.Send(request);
-
-                // Retorna os produtos encontrados
                 return Ok(produtos);
             }
             catch (Exception ex)
@@ -107,6 +113,7 @@ namespace RO.DevTest.WebApi.Controllers
         /// Atualiza um produto existente.
         /// </summary>
         [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin")] // <<< ADICIONE: Requer papel Admin para ATUALIZAR produto >>>
         [ProducesResponseType(typeof(UpdateProdutoResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -129,17 +136,30 @@ namespace RO.DevTest.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Deleta um produto existente pelo seu ID.
+        /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] // <<< ADICIONE: Requer papel Admin para DELETAR produto >>>
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)] // Adicionado para consistência
         public async Task<IActionResult> DeleteProduto(Guid id)
         {
-            var resultado = await _mediator.Send(new DeleteProdutoCommand(id));
+            try // Adicionado try-catch para lidar com exceções de forma mais robusta
+            {
+                var resultado = await _mediator.Send(new DeleteProdutoCommand(id));
 
-            if (!resultado)
-                return NotFound();
+                if (!resultado)
+                    return NotFound();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao deletar produto: {ex}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erro inesperado ao processar a solicitação de deleção.");
+            }
         }
-
-
     }
 }

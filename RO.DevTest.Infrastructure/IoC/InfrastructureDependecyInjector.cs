@@ -4,7 +4,6 @@ using RO.DevTest.Application.Contracts.Infrastructure;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Infrastructure.Abstractions;
 using RO.DevTest.Persistence;
-using RO.DevTest.Application.Contracts.infraes; // Adicionado
 using RO.DevTest.Infrastructure; // Adicionado (assumindo JwtTokenGenerator aqui)
 
 namespace RO.DevTest.Infrastructure.IoC;

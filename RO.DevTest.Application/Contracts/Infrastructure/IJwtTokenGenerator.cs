@@ -1,7 +1,7 @@
 using RO.DevTest.Domain.Entities;
 using System.Collections.Generic;
 
-namespace RO.DevTest.Application.Contracts.infraes
+namespace RO.DevTest.Application.Contracts.Infrastructure
 {
     public interface IJwtTokenGenerator
     {

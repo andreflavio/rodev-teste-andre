@@ -155,27 +155,22 @@ public class Program
     }
 }
 */
+// No arquivo Program.cs
 
-// No arquivo Program.cs (substitua o conteúdo atual por este)
-
-// >>> ADICIONE ESTES USINGS SE AINDA NÃO ESTIVEREM <<<
-using Microsoft.AspNetCore.Authentication.JwtBearer; // Necessário para JwtBearerDefaults
-using Microsoft.IdentityModel.Tokens; // Necessário para TokenValidationParameters, SymmetricSecurityKey
-using System.Text; // Necessário para Encoding.UTF8
-using Microsoft.Extensions.Options; // Necessário para IOptions (se usar IOptions)
-// -------------------------------------------------
-
-using RO.DevTest.Application;
-using RO.DevTest.Infrastructure;
-using RO.DevTest.Infrastructure.IoC; // Assumindo que a injeção de infraestrutura está aqui
-using RO.DevTest.Persistence;
-using RO.DevTest.Persistence.IoC; // Assumindo que a injeção de persistência está aqui
-using Microsoft.EntityFrameworkCore; // Adicionado para DbContext.Database.EnsureCreated/Migrate (mantenha se usar)
-// Usings para repositórios específicos (mantenha se necessário, mas a injeção via IoC já deve cuidar disso)
-using RO.DevTest.Application.Contracts.Persistence.Repositories;
-using RO.DevTest.Domain.Entities;
-using RO.DevTest.Persistence.Repositories;
-// Adicione usings que possam estar faltando no seu código original mas que são necessários
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Options; // Necessário para IOptions
+using RO.DevTest.Application; // Assumindo ApplicationLayer está aqui
+using RO.DevTest.Infrastructure.IoC; // Assumindo injeção de infraestrutura está aqui
+using RO.DevTest.Persistence.IoC; // Assumindo injeção de persistência está aqui
+using Microsoft.EntityFrameworkCore; // Mantenha se usa Migrations/EnsureCreated
+using RO.DevTest.Application.Contracts.Persistence.Repositories; // Mantenha se necessário
+using RO.DevTest.Domain.Entities; // Mantenha se necessário (para Cliente na injeção manual)
+using RO.DevTest.Persistence.Repositories; // Mantenha se necessário (para ClienteRepository na injeção manual)
+using RO.DevTest.Application.Features.Auth; // <<< ADICIONE/MANTENHA ESTE USING (Assumindo que JwtSettings está aqui)
+using System.Linq;
+using RO.DevTest.Infrastructure; // Mantenha se usa Any() em Migrations
 
 namespace RO.DevTest.WebApi;
 
@@ -185,75 +180,63 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Adicione a configuração ao contêiner de serviços se precisar acessá-la em outros lugares (opcional)
-        // builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+        // --- Configuração dos Serviços ---
 
-        // Configuração dos Serviços (Seus serviços existentes)
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // Configuração do CORS - INÍCIO (Sua configuração existente)
+        // Configuração do CORS
         builder.Services.AddCors(options =>
         {
-            // Política de CORS mais específica (pode ser útil para outros ambientes ou cenários)
             options.AddPolicy("AllowSwaggerUI",
                 builder =>
                 {
-                    // Permite requisições vindas especificamente da origem onde o Swagger UI está rodando via HTTP/HTTPS
-                    // Ajuste a porta (5087) se necessário.
-                    builder.WithOrigins("http://localhost:5087", "https://localhost:5087") // Adicionado HTTPS também
+                    // Permite requisições do Swagger UI (HTTP e HTTPS)
+                    builder.WithOrigins("http://localhost:5087", "https://localhost:5087")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
 
-            // ** POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO **
-            // Esta política permite qualquer origem, método e cabeçalho.
-            // Use SOMENTE em ambientes de desenvolvimento/teste local.
+            // POLÍTICA MAIS PERMISSIVA PARA DESENVOLVIMENTO (Permite qualquer origem, incluindo http://localhost:8000 do seu frontend simples)
             options.AddPolicy("DevelopmentPolicy",
                 builder =>
                 {
                     builder.AllowAnyOrigin() // Permite requisições de QUALQUER origem
-                        .AllowAnyHeader() // Permite qualquer cabeçalho na requisição
-                        .AllowAnyMethod(); // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
         });
-        // Configuração do CORS - FIM
 
-        // Configuração de Injeção de Dependência das Camadas (Suas chamadas existentes)
-        // Estas linhas devem configurar DbContext, Repositórios base e específicos, IIdentityAbstractor, IJwtTokenGenerator, etc.
-        // Verifique se elas já incluem a configuração para todos os seus repositórios (Cliente, Produto, Venda, User)
-        // e as abstrações (IdentityAbstractor, JwtTokenGenerator).
-        builder.Services.InjectPersistenceDependencies(builder.Configuration);
-        builder.Services.InjectInfrastructureDependencies(); // <-- Assumindo que JwtTokenGenerator e IdentityAbstractor são registrados aqui
+        // Configuração de Injeção de Dependência das Camadas (Verifique seus métodos Inject...Dependencies)
+        // Essas linhas devem registrar os DbContexts, Repositórios, Identity, JWT Generator, etc.
+        builder.Services.InjectPersistenceDependencies(builder.Configuration); // Assumindo que configura DbContext e Repositórios base
+        builder.Services.InjectInfrastructureDependencies(); // Assumindo que configura IdentityAbstractor e JwtTokenGenerator
 
-
-        // ** REGISTRO DOS REPOSITÓRIOS ESPECÍFICOS (Sua configuração - mantenha se necessária) **
-        // Se InjectPersistenceDependencies já registra IClienteRepository, IProdutoRepository, IVendaRepository,
-        // e IVendaRepository, você pode REMOVER as linhas abaixo para evitar registros duplicados.
-        // Verifique o código dos seus métodos Inject...Dependencies.
-        builder.Services.AddScoped<IClienteRepository, ClienteRepository>(); // Registro do repositório IClienteRepository
-        builder.Services.AddScoped<IBaseRepository<Cliente>, BaseRepository<Cliente>>(); // Caso o BaseRepository esteja sendo utilizado para outras operações
-        builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();  // Registro do repositório de Produto
-        builder.Services.AddScoped<IVendaRepository, VendaRepository>();     // Registro do repositório de Venda
+        // Registros de Repositórios Específicos (Mantenha SOMENTE se InjectPersistenceDependencies NÃO os registra)
+        // Se seus métodos Inject... JÁ registram IClienteRepository, IProdutoRepository, IVendaRepository, REMOVA as linhas abaixo.
+        builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+        builder.Services.AddScoped<IBaseRepository<Cliente>, BaseRepository<Cliente>>();
+        builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+        builder.Services.AddScoped<IVendaRepository, VendaRepository>();
 
 
-        // Configuração do MediatR (Sua configuração existente)
+        // Configuração do MediatR
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(
-                typeof(ApplicationLayer).Assembly, // Assembly da camada de Application
+                typeof(ApplicationLayer).Assembly, // Assembly da camada de Application (Ajuste se o nome da classe for diferente)
                 typeof(Program).Assembly // Assembly da camada WebApi
             );
         });
 
-        // *** CONFIGURAÇÃO JWT (Integrada e Corrigida) ***
+
+        // *** Configuração de Autenticação JWT ***
 
         // 1. Binda a seção "JwtSettings" do appsettings.json à classe JwtSettings
-        // ESTA LINHA É CRUCIAL para que a configuração seja lida corretamente.
         builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-        // Opcional: Verificar configurações JwtSettings no startup (boa prática)
+        // Opcional: Verificar configurações JwtSettings no startup (boa prática) - Mantenha se quiser esta validação inicial
         var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
         if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Secret) || string.IsNullOrEmpty(jwtSettings.Issuer) || string.IsNullOrEmpty(jwtSettings.Audience) || jwtSettings.ExpiryMinutes <= 0)
         {
@@ -270,27 +253,20 @@ public class Program
             })
             .AddJwtBearer(options =>
             {
-                // Esta configuração instrui o middleware JwtBearer como validar o token recebido
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true, // O token deve ter um emissor
-                    ValidateAudience = true, // O token deve ter uma audiência
-                    ValidateLifetime = true, // O token deve ter uma data de expiração e não estar expirado
-                    ValidateIssuerSigningKey = true, // A assinatura do token deve ser válida
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
 
-                    // >>> CORREÇÃO AQUI: Ler da configuração USANDO AS CHAVES CORRESPONDENTES À SEÇÃO "JwtSettings" <<<
-                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"], // O emissor válido (ex: "seuapi.com")
-                    ValidAudience = builder.Configuration["JwtSettings:Audience"], // A audiência válida (ex: "seufrontend.com")
-                    // A chave secreta para verificar a assinatura. Deve ser a MESMA usada para gerar o token.
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-                    // -------------------------------------------------------------------------------
+                    // <<< CORRIGIDO: Lendo da configuração USANDO AS CHAVES DA SEÇÃO "JwtSettings" >>>
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"], // Use "JwtSettings:Issuer"
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"], // Use "JwtSettings:Audience"
+                    // A chave secreta para verificar a assinatura.
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"])) // Use "JwtSettings:Secret"
+                    // -----------------------------------------------------------------------------------
                 };
-                // Opcional: Configurar o tratamento de eventos JWT (para logs, customização de respostas, etc.)
-                // options.Events = new JwtBearerEvents
-                // {
-                //     OnAuthenticationFailed = context => { /* Logar falha */ return Task.CompletedTask; },
-                //     OnTokenValidated = context => { /* Customizar Claims */ return Task.CompletedTask; }
-                // };
             });
 
         // 3. Adicionar Serviços de Autorização
@@ -301,94 +277,53 @@ public class Program
 
         var app = builder.Build(); // Linha que constrói a aplicação
 
-        // --- Opcional: Aplicar Migrations automaticamente na inicialização (Sua lógica - mantenha se usar) ---
+
+        // --- Opcional: Aplicar Migrations automaticamente na inicialização (Mantenha se usar) ---
         // Certifique-se de que esta lógica está correta para seu DbContext e Migrations
         // using (var scope = app.Services.CreateScope())
         // {
-        //     var services = scope.ServiceProvider;
-        //     try
-        //     {
-        //         var dbContext = services.GetRequiredService<DefaultContext>(); // Use o tipo real do seu DbContext
-        //         if (dbContext.Database.GetPendingMigrations().Any())
-        //         {
-        //             dbContext.Database.Migrate();
-        //         }
-        //         // Opcional: Criar o banco de dados se ele não existir (menos comum com Migrations)
-        //         // dbContext.Database.EnsureCreated();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         var logger = services.GetRequiredService<ILogger<Program>>(); // Adicione ILogger se necessário
-        //         logger.LogError(ex, "An error occurred while migrating or creating the database.");
-        //         // Tratar erro na inicialização, talvez sair da aplicação
-        //     }
+        //      // Sua lógica de migration/EnsureCreated aqui...
         // }
-        // --- Fim da aplicação automática de Migrations ---
 
 
-        // Configuração do Pipeline de Requisição HTTP
+        // --- Configuração do Pipeline de Requisição HTTP ---
         // Esta seção define a ordem em que os middlewares processam as requisições.
 
-        // Middleware para tratamento de exceções (geralmente o primeiro)
+        // 1. Middleware para tratamento de exceções (geralmente o primeiro)
         // app.UseExceptionHandler("/Error"); // Para ambientes que não são de desenvolvimento
         // app.UseHsts(); // Para ambientes de produção (HSTS - HTTP Strict Transport Security)
 
-        // ** Configurações ESPECÍFICAS para o Ambiente de Desenvolvimento **
+
+        // 2. UseRouting: Deve vir ANTES de CORS, UseAuthentication, UseAuthorization.
+        // Ele seleciona o endpoint que irá lidar com a requisição.
+        app.UseRouting(); // <<< ADICIONADO OU MOVIDO PARA ESTAR AQUI
+
+        // 3. UseCors: Deve vir APÓS UseRouting
+        // Aplica a política de CORS. Se tiver políticas diferentes por ambiente, coloque o UseCors dentro dos blocos if/else.
         if (app.Environment.IsDevelopment())
         {
-            // Habilita o Swagger e Swagger UI apenas em desenvolvimento
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
-            // Adicionar middleware de página de exceção do desenvolvedor (útil em dev)
-            // app.UseDeveloperExceptionPage(); // Mantenha se usar
-
-            // ** HABILITA A POLÍTICA DE CORS PERMISSIVA APENAS EM DESENVOLVIMENTO **
-            // Coloque UseCors AQUI para que ele seja aplicado no pipeline de DEV.
-            // app.UseRouting() DEVE vir ANTES de UseCors se o CORS precisar de informações de rota.
-            app.UseCors("DevelopmentPolicy"); // <-- Usa a política que permite AllowAnyOrigin()
-
-            // ** DESABILITA o Redirecionamento HTTPS APENAS EM DESENVOLVIMENTO **
-            // Comentamos ou removemos UseHttpsRedirection NESTE BLOCO.
-            // Isso permite que o Swagger UI (HTTP) se comunique diretamente com a API (ainda que rodando em HTTP/HTTPS)
-            // sem o redirecionamento forçado que pode causar conflitos de CORS.
-            // app.UseHttpsRedirection(); // <-- Esta linha NÃO deve estar ativa aqui em DEV
-
+            app.UseCors("DevelopmentPolicy"); // Aplica política de CORS para DEV (AllowAnyOrigin)
         }
-        // ** Configurações para OUTROS Ambientes (Produção, Staging, etc.) **
         else
         {
-            // Em outros ambientes, o Redirecionamento HTTPS GERALMENTE deve estar ATIVO por segurança.
-            app.UseHttpsRedirection();
-
-            // Em outros ambientes, use uma política de CORS MAIS RESTRITIVA e segura, se necessário.
-            // Por exemplo, permitir requisições APENAS do seu frontend de produção.
-            // app.UseCors("AllowSwaggerUI"); // Exemplo: usar a política mais específica
-            // app.UseCors("SuaPoliticaDeProducao");
+            // app.UseCors("YourProductionPolicy"); // Exemplo: Aplicar política de CORS para Produção
+            app.UseHttpsRedirection(); // HTTPS Redirection geralmente fica aqui em ambientes que não são DEV
         }
 
-        // --- Middlewares COMUNS a TODOS os ambientes (Geralmente) ---
 
-        // UseRouting deve vir ANTES de UseCors, UseAuthentication, UseAuthorization.
-        // Ele seleciona o endpoint, o que é necessário antes de aplicar políticas de CORS ou verificar autorização.
-        app.UseRouting(); // <-- Boa prática ter explícito e antes de CORS/Auth
+        // 4. UseAuthentication: Deve vir APÓS UseRouting e UseCors. Autentica o usuário.
+        app.UseAuthentication();
 
-        // O middleware de CORS deve vir APÓS UseRouting, pois a política pode depender da rota.
-        // Se você tem UseCors DENTRO dos blocos if/else como acima, remova-o daqui.
-        // Se você moveu UseCors para FORA dos if/else, coloque-o aqui APÓS UseRouting.
-        // app.UseCors("NomeDaPoliticaParaTodosOsAmbientes"); // Exemplo: se usar a mesma política para todos
+        // 5. UseAuthorization: Deve vir APÓS UseAuthentication. Verifica [Authorize] e [AllowAnonymous].
+        app.UseAuthorization();
 
-        // Middlewares de Autenticação e Autorização SÃO COMUNS a TODOS os ambientes onde você quer segurança.
-        // Eles DEVEM vir APÓS UseRouting e APÓS UseCors (se usar CORS)
-        app.UseAuthentication(); // Essencial: Adicionado para usar a autenticação configurada (lê o token)
-        app.UseAuthorization(); // Essencial: Adicionado para usar a autorização (verifica [Authorize] e papéis)
 
-        // MapControllers mapeia os endpoints dos seus controladores.
-        // Deve vir DEPOIS dos middlewares que afetam a seleção/autorização de endpoint (Routing, CORS, Auth).
+        // 6. MapControllers: Mapeia e executa o código do endpoint selecionado. Deve vir por último.
         app.MapControllers();
 
         // Middlewares de fallback ou terminais (rodam no final se nenhuma rota anterior lidou com a requisição)
         // app.MapFallbackToFile("index.html"); // Exemplo para SPAs
+
 
         // Inicia a aplicação
         app.Run();
