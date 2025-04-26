@@ -10,6 +10,7 @@ using RO.DevTest.Domain.Entities;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 // >>> ADICIONE ESTES USINGS TAMBÉM PARA O NOVO ENDPOINT <<<
 using RO.DevTest.Application.Features.Vendas.Queries.SalesAnalysis; // Necessário para a Query e Resultado
 // -------------------------------------------------------------
@@ -18,6 +19,7 @@ namespace RO.DevTest.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class VendaController : ControllerBase
     {
         private readonly IMediator _mediator;

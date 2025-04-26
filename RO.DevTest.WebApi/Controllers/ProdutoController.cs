@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 using RO.DevTest.Application.Features.Produtos;
 using RO.DevTest.Application.Features.Produtos.Queries;
 using RO.DevTest.Application.Features.Produtos.Commands;
-
+using Microsoft.AspNetCore.Authorization; // <--- ADICIONE ESTA LINHA
 namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/produtos")]
+    [Authorize]
     public class ProdutosController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -13,12 +13,12 @@ using RO.DevTest.Domain.Exception;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-// using Microsoft.Extensions.Logging; // Descomente se usar ILogger
-
+using Microsoft.AspNetCore.Authorization;
 namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/user")]
+    [Authorize]
 
     public class UsersController : ControllerBase
     {

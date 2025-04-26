@@ -8,11 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RO.DevTest.Application.Features.Clientes.UpdateClienteCommand;
+using Microsoft.AspNetCore.Authorization; // <--- ADICIONE ESTA LINHA
 
 namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/clientes")]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly IMediator _mediator;
