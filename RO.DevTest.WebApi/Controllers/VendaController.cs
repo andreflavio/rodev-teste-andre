@@ -137,7 +137,6 @@ namespace RO.DevTest.WebApi.Controllers
             });
         }
 
-        // >>> ADICIONE O NOVO ENDPOINT DE ANÁLISE DE VENDAS AQUI <<<
         /// <summary>
         /// Realiza a análise de vendas para um período especificado.
         /// </summary>
@@ -147,7 +146,7 @@ namespace RO.DevTest.WebApi.Controllers
         [HttpGet("analise")] // Define a rota para este endpoint: /api/Venda/analise
         [ProducesResponseType(typeof(GetSalesAnalysisResult), 200)] // Documenta o tipo de retorno para o Swagger
         [ProducesResponseType(400)] // Opcional: documentar erros de requisição inválida
-        // Opcional: [Authorize(Roles = "Admin")] // Adicionar autorização se necessário
+                                    // Opcional: [Authorize(Roles = "Admin")] // Adicionar autorização se necessário
         public async Task<ActionResult<GetSalesAnalysisResult>> GetSalesAnalysis(
             [FromQuery] DateTime startDate, // Pega a data de início da query string (ex: ?startDate=2023-01-01)
             [FromQuery] DateTime endDate    // Pega a data de fim da query string (ex: ?endDate=2023-12-31)
@@ -163,13 +162,16 @@ namespace RO.DevTest.WebApi.Controllers
             // Cria a Query com as datas recebidas
             var query = new GetSalesAnalysisQuery
             {
-                StartDate = startDate.Date, // Usa .Date para garantir que a hora seja 00:00:00
-                EndDate = endDate.Date.AddDays(1).AddSeconds(-1) // Usa .Date.AddDays(1).AddSeconds(-1) para incluir o dia final inteiro (até 23:59:59)
+                // >>> CORREÇÃO PARA O ERRO DE DateTimeKind.Unspecified <<<
+                // Usa .Date para garantir que a hora seja 00:00:00, e então força o Kind para Utc
+                StartDate = DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc),
+                // Usa .Date.AddDays(1).AddSeconds(-1) para incluir o dia final inteiro (até 23:59:59), e então força o Kind para Utc
+                EndDate = DateTime.SpecifyKind(endDate.Date.AddDays(1).AddSeconds(-1), DateTimeKind.Utc)
+                // ------------------------------------------------------------
             };
 
             // Envia a Query para o MediatR e aguarda o resultado do Handler
-            // Nota: Neste ponto, o GetSalesAnalysisQueryHandler ainda precisa ser implementado
-            // para que esta chamada funcione corretamente e retorne os dados esperados.
+            // O GetSalesAnalysisQueryHandler já está implementado e usará as datas ajustadas.
             var result = await _mediator.Send(query);
 
             // Retorna o resultado com status 200 OK
