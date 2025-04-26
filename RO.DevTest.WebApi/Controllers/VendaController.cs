@@ -1,3 +1,6 @@
+// No arquivo VendaController.cs
+
+// Certifique-se de que estes usings estão presentes no topo do arquivo:
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RO.DevTest.Application.Features.Vendas.Commands;
@@ -7,6 +10,9 @@ using RO.DevTest.Domain.Entities;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+// >>> ADICIONE ESTES USINGS TAMBÉM PARA O NOVO ENDPOINT <<<
+using RO.DevTest.Application.Features.Vendas.Queries.SalesAnalysis; // Necessário para a Query e Resultado
+// -------------------------------------------------------------
 
 namespace RO.DevTest.WebApi.Controllers
 {
@@ -15,7 +21,7 @@ namespace RO.DevTest.WebApi.Controllers
     public class VendaController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IVendaRepository _vendaRepository;
+        private readonly IVendaRepository _vendaRepository; // Mantenha este, pois é usado nos Gets/Deletes diretos
 
         public VendaController(IMediator mediator, IVendaRepository vendaRepository)
         {
@@ -23,7 +29,7 @@ namespace RO.DevTest.WebApi.Controllers
             _vendaRepository = vendaRepository;
         }
 
-        // POST: api/Venda
+        // POST: api/Venda - CreateVenda
         [HttpPost]
         public async Task<IActionResult> CreateVenda([FromBody] CreateVendaCommand command)
         {
@@ -42,7 +48,7 @@ namespace RO.DevTest.WebApi.Controllers
             });
         }
 
-        // GET: api/Venda/{id}
+        // GET: api/Venda/{id} - GetVendaById
         [HttpGet("{id}")]
         public async Task<IActionResult> GetVendaById(Guid id)
         {
@@ -54,7 +60,7 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(venda);
         }
 
-        // GET: api/Venda (Paginação)
+        // GET: api/Venda (Paginação) - GetVendas
         [HttpGet]
         public async Task<IActionResult> GetVendas([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -65,6 +71,7 @@ namespace RO.DevTest.WebApi.Controllers
             var totalPages = (int)Math.Ceiling((double)totalVendas / pageSize);
             var vendas = await _vendaRepository.GetAllAsync(page, pageSize);
 
+            // Certifique-se de que GetAllVendasResult e VendaItemDto estão definidos e acessíveis
             var result = new
             {
                 TotalVendas = totalVendas,
@@ -89,7 +96,7 @@ namespace RO.DevTest.WebApi.Controllers
             return Ok(result);
         }
 
-        // PUT: api/Venda/{id}
+        // PUT: api/Venda/{id} - UpdateVenda
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVenda(Guid id, [FromBody] UpdateVendaCommand command)
         {
@@ -113,7 +120,7 @@ namespace RO.DevTest.WebApi.Controllers
             return BadRequest(result);
         }
 
-        // DELETE: api/Venda/{id}
+        // DELETE: api/Venda/{id} - DeleteVenda
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVenda(Guid id)
         {
@@ -129,5 +136,47 @@ namespace RO.DevTest.WebApi.Controllers
                 Message = "Venda deletada com sucesso."
             });
         }
+
+        // >>> ADICIONE O NOVO ENDPOINT DE ANÁLISE DE VENDAS AQUI <<<
+        /// <summary>
+        /// Realiza a análise de vendas para um período especificado.
+        /// </summary>
+        /// <param name="startDate">Data de início do período (formatoYYYY-MM-DD).</param>
+        /// <param name="endDate">Data de fim do período (formatoYYYY-MM-DD).</param>
+        /// <returns>Os resultados da análise de vendas.</returns>
+        [HttpGet("analise")] // Define a rota para este endpoint: /api/Venda/analise
+        [ProducesResponseType(typeof(GetSalesAnalysisResult), 200)] // Documenta o tipo de retorno para o Swagger
+        [ProducesResponseType(400)] // Opcional: documentar erros de requisição inválida
+        // Opcional: [Authorize(Roles = "Admin")] // Adicionar autorização se necessário
+        public async Task<ActionResult<GetSalesAnalysisResult>> GetSalesAnalysis(
+            [FromQuery] DateTime startDate, // Pega a data de início da query string (ex: ?startDate=2023-01-01)
+            [FromQuery] DateTime endDate    // Pega a data de fim da query string (ex: ?endDate=2023-12-31)
+        )
+        {
+            // Validação básica das datas (opcional, pode ser mais robusta em um Validator)
+            if (startDate == default || endDate == default || startDate > endDate)
+            {
+                // Retorna BadRequest se as datas não forem válidas
+                return BadRequest("As datas de início e fim do período são obrigatórias e a data de início deve ser anterior ou igual à data de fim.");
+            }
+
+            // Cria a Query com as datas recebidas
+            var query = new GetSalesAnalysisQuery
+            {
+                StartDate = startDate.Date, // Usa .Date para garantir que a hora seja 00:00:00
+                EndDate = endDate.Date.AddDays(1).AddSeconds(-1) // Usa .Date.AddDays(1).AddSeconds(-1) para incluir o dia final inteiro (até 23:59:59)
+            };
+
+            // Envia a Query para o MediatR e aguarda o resultado do Handler
+            // Nota: Neste ponto, o GetSalesAnalysisQueryHandler ainda precisa ser implementado
+            // para que esta chamada funcione corretamente e retorne os dados esperados.
+            var result = await _mediator.Send(query);
+
+            // Retorna o resultado com status 200 OK
+            return Ok(result);
+        }
+        // --------------------------------------------------------------------
+
+
     }
 }
