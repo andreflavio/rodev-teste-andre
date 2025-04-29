@@ -1,80 +1,50 @@
-﻿using FluentValidation.Results;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
 using RO.DevTest.Application.Contracts.Infrastructure;
-using RO.DevTest.Domain.Exception;
+using RO.DevTest.Domain.Entities;
+using RO.DevTest.Domain.Enums;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using BCrypt.Net;
 
-namespace RO.DevTest.Application.Features.User.Commands.CreateUserCommand
+namespace RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
+
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, CreateUserResult>
 {
-    /// <summary>
-    /// Command handler for the creation of <see cref="Domain.Entities.User"/>
-    /// </summary>
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, CreateUserResult>
+    private readonly IUserRepository _userRepository;
+    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+
+    public CreateUserCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
     {
-        private readonly IIdentityAbstractor _identityAbstractor;
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
+    }
 
-        // Construtor correto para injeção de dependência
-        public CreateUserCommandHandler(IIdentityAbstractor identityAbstractor)
-        {
-            _identityAbstractor = identityAbstractor ?? throw new ArgumentNullException(nameof(identityAbstractor));
-        }
+    public async Task<CreateUserResult> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserName))
+            throw new ArgumentException("O nome de usuário é obrigatório.", nameof(request.UserName));
+        if (string.IsNullOrWhiteSpace(request.Name))
+            throw new ArgumentException("O nome é obrigatório.", nameof(request.Name));
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new ArgumentException("O email é obrigatório.", nameof(request.Email));
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new ArgumentException("A senha é obrigatória.", nameof(request.Password));
+        if (request.Password != request.PasswordConfirmation)
+            throw new ArgumentException("A senha e a confirmação da senha não coincidem.", nameof(request.Password));
 
-        public async Task<CreateUserResult> Handle(CreateUserCommand request, CancellationToken cancellationToken)
-        {
-            // Validar o request
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request), "O objeto request não pode ser nulo.");
-            }
+        var existingUser = await _userRepository.GetByEmailAsync(request.Email);
+        if (existingUser != null)
+            throw new ArgumentException("O email já está em uso.", nameof(request.Email));
 
-            // Validar o request com FluentValidation
-            CreateUserCommandValidator validator = new();
-            ValidationResult validationResult = await validator.ValidateAsync(request, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                throw new BadRequestException(validationResult);
-            }
+        var user = request.AssignTo();
+        user.Id = Guid.NewGuid().ToString();
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            // Criar o novo usuário a partir do request
-            Domain.Entities.User newUser = request.AssignTo();
+        await _userRepository.AddAsync(user);
 
-            // Verificação se a criação do novo usuário falhou
-            if (newUser == null)
-            {
-                throw new InvalidOperationException("Falha ao criar o usuário a partir da solicitação.");
-            }
+        var token = _jwtTokenGenerator.GenerateToken(user);
 
-            // Criar o usuário na identidade
-            IdentityResult userCreationResult = await _identityAbstractor.CreateUserAsync(newUser, request.Password);
-
-            // Verifique se o resultado da criação é válido
-            if (userCreationResult == null)
-            {
-                throw new InvalidOperationException("O resultado da criação do usuário não pode ser nulo.");
-            }
-
-            // Verifique se a criação do usuário foi bem-sucedida
-            if (!userCreationResult.Succeeded)
-            {
-                throw new BadRequestException(userCreationResult);
-            }
-
-            // Adicionar o usuário ao papel (role)
-            IdentityResult userRoleResult = await _identityAbstractor.AddToRoleAsync(newUser, request.Role);
-
-            // Verifique se o resultado de adicionar o papel é válido
-            if (userRoleResult == null)
-            {
-                throw new InvalidOperationException("O resultado de adicionar o papel ao usuário não pode ser nulo.");
-            }
-
-            if (!userRoleResult.Succeeded)
-            {
-                throw new BadRequestException(userRoleResult);
-            }
-
-            // Retornar o resultado com o novo usuário criado
-            return new CreateUserResult(newUser);
-        }
+        return new CreateUserResult(user);
     }
 }

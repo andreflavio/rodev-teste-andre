@@ -55,6 +55,7 @@ namespace RO.DevTest.WebApi.Controllers
         [HttpGet]
         // <<< Este método GetAllUsers está protegido pelo [Authorize] da classe.
         // Você pode adicionar [Authorize(Roles = "Admin")] aqui se só Admins puderem listar todos.
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<GetAllUsersResult>>> GetAllUsers(
             [FromQuery] string? name,
             [FromQuery] string? userName)

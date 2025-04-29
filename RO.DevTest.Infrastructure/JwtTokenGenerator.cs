@@ -1,70 +1,96 @@
-using Microsoft.Extensions.Options; // <<< ADICIONE ESTE USING
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using RO.DevTest.Application.Contracts.Infrastructure; // Verifique se este using está correto
-using RO.DevTest.Domain.Entities; // Verifique se User está aqui
+using RO.DevTest.Application.Contracts.Infrastructure;
+using RO.DevTest.Application.Features.Auth;
+using RO.DevTest.Domain.Entities;
+using RO.DevTest.Domain.Extensions;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using RO.DevTest.Application.Features.Auth; // <<< ADICIONE ESTE USING (Assumindo que JwtSettings está aqui, ajuste se for em outra camada/pasta)
 
+namespace RO.DevTest.Infrastructure;
 
-namespace RO.DevTest.Infrastructure // Namespace ajustado, mantenha este
+public class JwtTokenGenerator : IJwtTokenGenerator
 {
-    public class JwtTokenGenerator : IJwtTokenGenerator
+    private readonly IOptions<JwtSettings> _jwtSettingsOptions;
+
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtSettingsOptions)
     {
-        // <<< MUDE DE IConfiguration PARA IOptions<JwtSettings> >>>
-        private readonly IOptions<JwtSettings> _jwtSettingsOptions;
+        _jwtSettingsOptions = jwtSettingsOptions ?? throw new ArgumentNullException(nameof(jwtSettingsOptions));
+    }
 
-        // <<< MUDE O CONSTRUTOR PARA RECEBER IOptions<JwtSettings> >>>
-        public JwtTokenGenerator(IOptions<JwtSettings> jwtSettingsOptions)
+    public string GenerateToken(User user)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+
+        var jwtSettings = _jwtSettingsOptions.Value;
+        if (string.IsNullOrEmpty(jwtSettings.Secret))
+            throw new InvalidOperationException("Configuração da chave secreta JWT (JwtSettings:Secret) está faltando ou vazia.");
+
+        var claims = new List<Claim>
         {
-            _jwtSettingsOptions = jwtSettingsOptions;
-        }
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Role, user.Role.GetDescription())
+        };
 
-        public string GenerateToken(User user, IList<string> roles)
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var expirationTime = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiryMinutes);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            // <<< OBTENHA AS CONFIGURAÇÕES AQUI USANDO .Value >>>
-            var jwtSettings = _jwtSettingsOptions.Value;
+            Subject = new ClaimsIdentity(claims),
+            Expires = expirationTime,
+            Issuer = jwtSettings.Issuer,
+            Audience = jwtSettings.Audience,
+            SigningCredentials = creds
+        };
 
-            // Uma verificação de segurança (embora a validação na inicialização deva pegar)
-            if (string.IsNullOrEmpty(jwtSettings.Secret))
-            {
-                throw new InvalidOperationException("Configuração da chave secreta JWT (JwtSettings:Secret) está faltando ou vazia.");
-            }
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName ?? user.Email)
-            };
+        return tokenHandler.WriteToken(token);
+    }
 
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+    public string GenerateToken(User user, IList<string> roles)
+    {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+        if (roles == null || roles.Count == 0)
+            throw new ArgumentException("Pelo menos um role deve ser fornecido.", nameof(roles));
 
-            // <<< ACESSE AS CONFIGURAÇÕES CORRETAMENTE USANDO jwtSettings.NomeDaPropriedade >>>
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)); // Use jwtSettings.Secret
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var jwtSettings = _jwtSettingsOptions.Value;
+        if (string.IsNullOrEmpty(jwtSettings.Secret))
+            throw new InvalidOperationException("Configuração da chave secreta JWT (JwtSettings:Secret) está faltando ou vazia.");
 
-            // Use ExpiryMinutes da configuração para o tempo de expiração
-            var expirationTime = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiryMinutes);
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Role, roles[0]) // Usa apenas o primeiro role
+        };
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = expirationTime, // Use o tempo de expiração calculado
-                Issuer = jwtSettings.Issuer, // Use jwtSettings.Issuer
-                Audience = jwtSettings.Audience, // Use jwtSettings.Audience
-                SigningCredentials = creds
-            };
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+        var expirationTime = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiryMinutes);
 
-            return tokenHandler.WriteToken(token);
-        }
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = expirationTime,
+            Issuer = jwtSettings.Issuer,
+            Audience = jwtSettings.Audience,
+            SigningCredentials = creds
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return tokenHandler.WriteToken(token);
     }
 }
