@@ -1,64 +1,77 @@
-﻿// Caminho: C:\Users\André\teste\RO.DevTest3\RO.DevTest.WebApi\Controllers\UsersController.cs
-
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using NSwag.Annotations; // Certifique-se de que este using está presente se estiver usando NSwag
+using NSwag.Annotations;
 using RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
 using RO.DevTest.Application.Features.User.Commands.DeleteUserCommand;
 using RO.DevTest.Application.Features.User.Commands.GetAllUsersCommand;
 using RO.DevTest.Application.Features.User.Commands.UpdateUserCommand;
-using RO.DevTest.Domain.Exception; // Certifique-se de que este using está presente se estiver usando BadRequestException
+using RO.DevTest.Domain.Exception;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization; // Este using é ESSENCIAL para [Authorize] e [AllowAnonymous]
-using System.Linq; // Necessário para o método Any() usado em GetAllUsers
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
+using RO.DevTest.Domain.Enums;
 
 namespace RO.DevTest.WebApi.Controllers
 {
     [ApiController]
     [Route("api/user")]
-    [Authorize] // <<< Este [Authorize] fica aqui para proteger os outros métodos do controlador >>>
-
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IMediator _mediator;
-        // private readonly ILogger<UsersController> _logger; // Descomente se usar ILogger
+        private readonly IConfiguration _configuration;
 
-        public UsersController(IMediator mediator/*, ILogger<UsersController> logger*/)
+        public UsersController(IMediator mediator, IConfiguration configuration)
         {
             _mediator = mediator;
-            // _logger = logger; // Descomente se usar ILogger
+            _configuration = configuration;
         }
 
-        /// <summary>
-        /// Cria um novo usuário.
-        /// </summary>
-        /// <param name="request">Dados para criação do usuário.</param>
-        /// <returns>Resultado da criação do usuário.</returns>
+        [HttpPost("admin")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateAdmin([FromBody] CreateUserCommand command, [FromQuery] string masterPassword)
+        {
+            try
+            {
+                // Pega a senha master configurada no appsettings
+                var configuredPassword = _configuration["AdminSettings:MasterPassword"];
+
+                // Verifica se a senha mestre fornecida é a correta
+                if (masterPassword != configuredPassword)
+                {
+                    return Forbid("Senha mestre incorreta.");
+                }
+
+                // Envia o comando para criar o usuário
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Retorna erro detalhado
+                return StatusCode(500, $"Erro ao criar o usuário admin: {ex.Message}");
+            }
+        }
+
+        // Criação de um novo usuário
         [HttpPost]
-        [AllowAnonymous] // <<< COLOQUE ESTA LINHA AQUI, ACIMA DO MÉTODO CreateUser >>>
+        [AllowAnonymous]
         [ProducesResponseType(typeof(CreateUserResult), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(CreateUserResult), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateUser([FromQuery] CreateUserCommand request)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserCommand request)
         {
             CreateUserResult response = await _mediator.Send(request);
             return Created(HttpContext.Request.GetDisplayUrl(), response);
         }
 
-        /// <summary>
-        /// Busca todos os usuários ou filtra por nome e/ou username.
-        /// </summary>
-        // ... outros atributos [HttpGet], [ProducesResponseType] ...
+        // Busca todos os usuários ou filtra por nome e/ou username
         [HttpGet]
-        // <<< Este método GetAllUsers está protegido pelo [Authorize] da classe.
-        // Você pode adicionar [Authorize(Roles = "Admin")] aqui se só Admins puderem listar todos.
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<GetAllUsersResult>>> GetAllUsers(
-            [FromQuery] string? name,
-            [FromQuery] string? userName)
+        public async Task<ActionResult<IEnumerable<GetAllUsersResult>>> GetAllUsers([FromQuery] string? name, [FromQuery] string? userName)
         {
             var query = new GetAllUsersCommand
             {
@@ -70,7 +83,6 @@ namespace RO.DevTest.WebApi.Controllers
 
             if (response == null || !response.Any())
             {
-                // Nenhum usuário encontrado
                 return NotFound(new
                 {
                     Message = "Nenhum usuário encontrado com os parâmetros informados.",
@@ -79,7 +91,6 @@ namespace RO.DevTest.WebApi.Controllers
                 });
             }
 
-            // Usuários encontrados com sucesso
             return Ok(new
             {
                 Message = "Usuários encontrados com sucesso.",
@@ -88,14 +99,8 @@ namespace RO.DevTest.WebApi.Controllers
             });
         }
 
-
-        /// <summary>
-        /// Atualiza um usuário existente.
-        /// </summary>
-        // ... outros atributos [HttpPut], [ProducesResponseType] ...
+        // Atualiza um usuário existente
         [HttpPut("{id:guid}")]
-        // <<< Este método UpdateUser está protegido pelo [Authorize] da classe.
-        // Você pode adicionar [Authorize(Roles = "Admin")] aqui se só Admins puderem atualizar.
         [ProducesResponseType(typeof(UpdateUserResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -118,19 +123,12 @@ namespace RO.DevTest.WebApi.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ocorreu um erro inesperado: {ex.Message}");
-                Console.WriteLine($"Detalhes: {ex.ToString()}");
-                // _logger.LogError(ex, "Ocorreu um erro inesperado ao atualizar o usuário com ID {UserId}.", id); // Descomente se usar ILogger
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno inesperado ao processar a solicitação.");
             }
         }
 
-        /// <summary>
-        /// Deleta um usuário existente pelo seu ID.
-        /// </summary>
-        // ... outros atributos [HttpDelete], [ProducesResponseType] ...
+        // Deleta um usuário existente pelo seu ID
         [HttpDelete("{id:guid}")]
-        // <<< Este método DeleteUser está protegido pelo [Authorize] da classe.
-        // Você pode adicionar [Authorize(Roles = "Admin")] aqui se só Admins puderem deletar.
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -155,7 +153,6 @@ namespace RO.DevTest.WebApi.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Ocorreu um erro inesperado ao deletar o usuário com ID {id}: {ex.Message}");
-                Console.WriteLine($"Detalhes: {ex.ToString()}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro interno inesperado ao processar a solicitação de deleção.");
             }
         }

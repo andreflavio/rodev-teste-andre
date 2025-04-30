@@ -4,6 +4,7 @@ using RO.DevTest.Domain.Entities; // Certifique-se de ter o using para sua entid
 using System; // Necessário para DateTime
 using System.Collections.Generic; // Necessário para Task<List<Venda>>
 using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace RO.DevTest.Application.Contracts.Persistence.Repositories;
 
@@ -25,6 +26,8 @@ public interface IVendaRepository // : IBaseRepository<Venda> // Exemplo se herd
     /// <param name="endDate">Data de fim do período (inclusive).</param>
     /// <returns>Uma lista de vendas que ocorreram entre startDate e endDate.</returns>
     Task<List<Venda>> GetSalesByPeriodAsync(DateTime startDate, DateTime endDate); // <-- NOVO MÉTODO ADICIONADO
+    Task<bool> AnyAsync(Expression<Func<Venda, bool>> predicate);
+
 
     // ... outros métodos, se houver ...
 }

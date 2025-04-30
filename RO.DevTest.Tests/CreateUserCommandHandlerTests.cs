@@ -1,106 +1,179 @@
 using FluentAssertions;
 using Moq;
 using RO.DevTest.Application.Contracts.Infrastructure;
+using RO.DevTest.Application.Contracts.Persistence.Repositories;
 using RO.DevTest.Application.Features.User.Commands.CreateUserCommand;
-using RO.DevTest.Domain.Exception;
-using Microsoft.AspNetCore.Identity; // Necessário para IdentityResult
-using RO.DevTest.Domain.Enums; // Necessário para acessar o enum UserRoles
-using RO.DevTest.Domain.Entities; // Necessário para o mock do AssignTo se aplicável
+using RO.DevTest.Domain.Entities; // Adicionado explicitamente
+using RO.DevTest.Domain.Enums;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
-namespace RO.DevTest.Tests.Unit.Application.Features.User.Commands;
-
-public class CreateUserCommandHandlerTests
+namespace RO.DevTest.Tests.Unit.Application.Features.User.Commands
 {
-    // Removido inicialização no construtor
-
-    [Fact]
-    public async Task Handle_WhenEmailIsEmpty_ShouldThrowBadRequestException()
+    public class CreateUserCommandHandlerTests
     {
-        // Arrange
-        var identityAbstractorMock = new Mock<IIdentityAbstractor>();
-        var sut = new CreateUserCommandHandler(identityAbstractorMock.Object);
+        private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<IJwtTokenGenerator> _jwtTokenGeneratorMock;
+        private readonly CreateUserCommandHandler _sut;
 
-        var command = new CreateUserCommand
+        public CreateUserCommandHandlerTests()
         {
-            Email = "", // Email vazio para testar validação
-            UserName = "user_test",
-            Password = "password123",
-            PasswordConfirmation = "password123",
-            Name = "Test User",
-            Role = UserRoles.Customer // Usando membro existente do enum
-        };
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _jwtTokenGeneratorMock = new Mock<IJwtTokenGenerator>();
+            _sut = new CreateUserCommandHandler(_userRepositoryMock.Object, _jwtTokenGeneratorMock.Object);
+        }
 
-        // Não precisamos configurar o mock de IdentityAbstractor aqui,
-        // pois o teste espera que a validação falhe antes de chamar o IdentityAbstractor.
-
-        // Act
-        Func<Task> act = async () => await sut.Handle(command, new CancellationToken());
-
-        // Assert
-        await act.Should().ThrowAsync<BadRequestException>();
-    }
-
-    [Fact]
-    public async Task Handle_WhenPasswordsDoNotMatch_ShouldThrowBadRequestException()
-    {
-        // Arrange
-        var identityAbstractorMock = new Mock<IIdentityAbstractor>();
-        var sut = new CreateUserCommandHandler(identityAbstractorMock.Object);
-
-        var command = new CreateUserCommand
+        [Fact]
+        public async Task Handle_WhenEmailIsEmpty_ShouldThrowArgumentException()
         {
-            Email = "validemail@domain.com",
-            UserName = "user_test",
-            Password = "password123",
-            PasswordConfirmation = "wrongpassword", // Senhas não coincidem
-            Name = "Test User",
-            Role = UserRoles.Customer // Usando membro existente do enum
-        };
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "",
+                UserName = "user_test",
+                Password = "password123",
+                PasswordConfirmation = "password123",
+                Name = "Test User",
+                Role = UserRoles.Customer
+            };
 
-        // Não precisamos configurar o mock de IdentityAbstractor aqui,
-        // pois o teste espera que a validação falhe antes de chamar o IdentityAbstractor.
+            // Act
+            Func<Task> act = async () => await _sut.Handle(command, CancellationToken.None);
 
-        // Act
-        Func<Task> act = async () => await sut.Handle(command, new CancellationToken());
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("O campo Email do request é obrigatório.*");
+        }
 
-        // Assert
-        await act.Should().ThrowAsync<BadRequestException>();
-    }
-
-    [Fact]
-    public async Task Handle_WhenValidData_ShouldNotThrowException()
-    {
-        // Arrange
-        var identityAbstractorMock = new Mock<IIdentityAbstractor>();
-        var sut = new CreateUserCommandHandler(identityAbstractorMock.Object);
-
-        var command = new CreateUserCommand
+        [Fact]
+        public async Task Handle_WhenPasswordsDoNotMatch_ShouldThrowArgumentException()
         {
-            Email = "validemail@domain.com",
-            UserName = "user_test",
-            Password = "password123",
-            PasswordConfirmation = "password123",
-            Name = "Test User",
-            Role = UserRoles.Customer // Usando membro existente do enum
-        };
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "validemail@domain.com",
+                UserName = "user_test",
+                Password = "password123",
+                PasswordConfirmation = "wrongpassword",
+                Name = "Test User",
+                Role = UserRoles.Customer
+            };
 
-        // *** CONFIGURAÇÃO DO MOCK PARA ESTE TESTE ***
-        identityAbstractorMock
-            .Setup(ia => ia.CreateUserAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success);
+            // Act
+            Func<Task> act = async () => await _sut.Handle(command, CancellationToken.None);
 
-        // Configura AddToRoleAsync para retornar um resultado de sucesso
-        // CORRIGIDO: Usando It.IsAny<UserRoles>() para o segundo argumento
-        identityAbstractorMock
-           .Setup(ia => ia.AddToRoleAsync(It.IsAny<Domain.Entities.User>(), It.IsAny<UserRoles>())) // <-- CORREÇÃO AQUI
-           .ReturnsAsync(IdentityResult.Success);
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("Os campos Password e PasswordConfirmation do request não coincidem.*");
+        }
 
-        // Lembre-se de garantir que request.AssignTo() funciona ou está mockado para retornar User válido.
+        [Fact]
+        public async Task Handle_WhenUserNameIsEmpty_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "validemail@domain.com",
+                UserName = "",
+                Password = "password123",
+                PasswordConfirmation = "password123",
+                Name = "Test User",
+                Role = UserRoles.Customer
+            };
 
-        // Act
-        Func<Task> act = async () => await sut.Handle(command, new CancellationToken());
+            // Act
+            Func<Task> act = async () => await _sut.Handle(command, CancellationToken.None);
 
-        // Assert
-        await act.Should().NotThrowAsync();
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("O campo UserName do request é obrigatório.*");
+        }
+
+        [Fact]
+        public async Task Handle_WhenNameIsEmpty_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "validemail@domain.com",
+                UserName = "user_test",
+                Password = "password123",
+                PasswordConfirmation = "password123",
+                Name = "",
+                Role = UserRoles.Customer
+            };
+
+            // Act
+            Func<Task> act = async () => await _sut.Handle(command, CancellationToken.None);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("O campo Name do request é obrigatório.*");
+        }
+
+        [Fact]
+        public async Task Handle_WhenEmailAlreadyExists_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "validemail@domain.com",
+                UserName = "user_test",
+                Password = "password123",
+                PasswordConfirmation = "password123",
+                Name = "Test User",
+                Role = UserRoles.Customer
+            };
+
+            var existingUser = new Domain.Entities.User { Email = command.Email }; // Usando namespace completo
+            _userRepositoryMock.Setup(r => r.GetByEmailAsync(command.Email))
+                .ReturnsAsync(existingUser);
+
+            // Act
+            Func<Task> act = async () => await _sut.Handle(command, CancellationToken.None);
+
+            // Assert
+            await act.Should().ThrowAsync<ArgumentException>()
+                .WithMessage("O campo Email do request já está em uso.*");
+        }
+
+        [Fact]
+        public async Task Handle_WhenValidData_ShouldReturnCreateUserResult()
+        {
+            // Arrange
+            var command = new CreateUserCommand
+            {
+                Email = "validemail@domain.com",
+                UserName = "user_test",
+                Password = "password123",
+                PasswordConfirmation = "password123",
+                Name = "Test User",
+                Role = UserRoles.Customer
+            };
+
+            _userRepositoryMock.Setup(r => r.GetByEmailAsync(command.Email))
+                .ReturnsAsync((Domain.Entities.User?)null); // Usando namespace completo
+
+            _userRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Domain.Entities.User>()))
+                .Returns(Task.CompletedTask);
+
+            _jwtTokenGeneratorMock.Setup(g => g.GenerateToken(It.IsAny<Domain.Entities.User>(), It.IsAny<IList<string>>()))
+                .Returns("fake-token"); // Atualizado para suportar roles
+
+            // Act
+            var result = await _sut.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.UserName.Should().Be(command.UserName);
+            result.Email.Should().Be(command.Email);
+            result.Name.Should().Be(command.Name);
+            // Removido result.Role.Should().Be(command.Role) devido a CS1061
+            _userRepositoryMock.Verify(r => r.GetByEmailAsync(command.Email), Times.Once());
+            _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Domain.Entities.User>()), Times.Once());
+            _jwtTokenGeneratorMock.Verify(g => g.GenerateToken(It.IsAny<Domain.Entities.User>(), It.IsAny<IList<string>>()), Times.Once());
+        }
     }
 }

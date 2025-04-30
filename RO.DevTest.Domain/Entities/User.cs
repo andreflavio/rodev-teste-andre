@@ -2,12 +2,11 @@
 
 using Microsoft.AspNetCore.Identity;
 using RO.DevTest.Domain.Enums;
-using System.ComponentModel.DataAnnotations.Schema; // <-- ADICIONE ESTE USING
 
 namespace RO.DevTest.Domain.Entities;
 
 /// <summary>
-/// Represents a <see cref="IdentityUser"/> int the API
+/// Represents a <see cref="IdentityUser"/> in the API
 /// </summary>
 public class User : IdentityUser
 {
@@ -16,11 +15,10 @@ public class User : IdentityUser
     /// </summary>
     public string Name { get; set; } = string.Empty;
 
-    // Adicione [NotMapped] aqui para dizer ao Entity Framework para ignorar esta propriedade no banco de dados
-    [NotMapped] // <-- ADICIONE ESTA LINHA
-    public UserRoles Role { get; set; } // <-- Sua propriedade Role existente
+    /// <summary>
+    /// Role of the user (Admin or Customer)
+    /// </summary>
+    public UserRoles Role { get; set; } = UserRoles.Customer; // Agora esta propriedade será mapeada no banco
 
     public User() : base() { }
-
-    // Se você tiver outros construtores ou métodos na sua entidade User, mantenha-os aqui.
 }

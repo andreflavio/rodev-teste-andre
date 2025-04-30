@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RO.DevTest.Application.Contracts.Infrastructure;
-using RO.DevTest.Application.Features.Auth;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Domain.Extensions;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Collections.Generic;
 
 namespace RO.DevTest.Infrastructure;
 
@@ -20,7 +20,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _jwtSettingsOptions = jwtSettingsOptions ?? throw new ArgumentNullException(nameof(jwtSettingsOptions));
     }
 
-    public string GenerateToken(User user)
+    public object GenerateToken(User user)
     {
         if (user == null)
             throw new ArgumentNullException(nameof(user));
@@ -53,7 +53,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        return tokenHandler.WriteToken(token);
+        return tokenHandler.WriteToken(token); // Retorna string, compatível com object
     }
 
     public string GenerateToken(User user, IList<string> roles)
